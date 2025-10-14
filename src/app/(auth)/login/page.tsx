@@ -28,7 +28,7 @@ import { useState } from 'react'
 import { login } from '@/services/login/login'
 import { useUserStore } from '@/stores/useUserStore'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { ShIcon } from '@/components/icon'
+import { ShIcon } from '@/components/Icon'
 
 const loginSchema = z.object({
     email: z.string().email('Please enter a valid email address').toLowerCase(),
@@ -74,7 +74,7 @@ export default function LoginPage() {
             setTokens(accessToken, refreshToken)
             toast('Login successful')
             router.push(redirectTo)
-        } catch (error) {
+        } catch {
             toast('Login failed')
         }
     }

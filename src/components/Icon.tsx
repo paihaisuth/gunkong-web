@@ -27,12 +27,12 @@ export function ShIcon({
 
     const pascalCaseName = convertToPascalCase(name)
 
-    const IconComponent =
-        (LucideIcons as any)[pascalCaseName] || LucideIcons.AlertCircle
+    const iconMap = LucideIcons as any
+    const IconComponent = iconMap[pascalCaseName] || LucideIcons.AlertCircle
 
     if (
         process.env.NODE_ENV === 'development' &&
-        !(LucideIcons as any)[pascalCaseName]
+        !(pascalCaseName in LucideIcons)
     ) {
         console.warn(
             `Icon "${name}" (${pascalCaseName}) not found in lucide-react, using AlertCircle fallback`
