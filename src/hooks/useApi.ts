@@ -30,8 +30,8 @@ const httpWithoutHeader = (
     })
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const handleResponse = (response: any): any => {
-    // eslint-disable-line @typescript-eslint/no-explicit-any
     if (response.data?.data) {
         return response.data.data
     }
@@ -102,6 +102,7 @@ export const useApi = <IResponse>(options: Options) => {
                     response = handleResponse(response)
 
                     const data =
+                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
                         (response as any)?.item || (response as any)?.items
                     setState((prev) => ({ ...prev, data, isFetching: false }))
 
@@ -109,6 +110,7 @@ export const useApi = <IResponse>(options: Options) => {
                         onOk(data)
                     }
                 } catch (error: unknown) {
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
                     if ((error as any).response?.status === 401) {
                         useUserStore.getState().logout()
 
@@ -123,8 +125,11 @@ export const useApi = <IResponse>(options: Options) => {
                         onError(error)
                     }
 
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
                     if ((error as any).response) {
+                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
                         if ((error as any).response.data?.error?.message) {
+                            // eslint-disable-next-line @typescript-eslint/no-explicit-any
                             const { message } = (error as any).response.data
                                 .error
 
@@ -133,14 +138,17 @@ export const useApi = <IResponse>(options: Options) => {
                                 console.error(message)
                             }
                         }
+                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
                     } else if ((error as any).request) {
                         // TODO: Replace with your notification system
                         if (notifyError) {
+                            // eslint-disable-next-line @typescript-eslint/no-explicit-any
                             console.error((error as any).request)
                         }
                     } else {
                         // TODO: Replace with your notification system
                         if (notifyError) {
+                            // eslint-disable-next-line @typescript-eslint/no-explicit-any
                             console.error((error as any).message)
                         }
                     }

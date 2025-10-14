@@ -27,6 +27,7 @@ export function ShIcon({
 
     const pascalCaseName = convertToPascalCase(name)
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const iconMap = LucideIcons as any
     const IconComponent = iconMap[pascalCaseName] || LucideIcons.AlertCircle
 
