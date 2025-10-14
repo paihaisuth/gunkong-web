@@ -1,5 +1,6 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
+import { setAuthCookies, removeAuthCookies } from '@/lib/auth-cookies'
 
 interface User {
     id: string
@@ -29,14 +30,12 @@ type UserStore = UserState & UserActions
 export const useUserStore = create<UserStore>()(
     persist(
         (set, get) => ({
-            // Initial state
             user: null,
             accessToken: null,
             refreshToken: null,
             isAuthenticated: false,
             isLoading: false,
 
-            // Actions
             setUser: (user: User) => {
                 set({ user, isAuthenticated: !!user })
             },
@@ -47,6 +46,7 @@ export const useUserStore = create<UserStore>()(
                     refreshToken: refreshToken || get().refreshToken,
                     isAuthenticated: !!accessToken,
                 })
+                setAuthCookies(accessToken, refreshToken)
             },
 
             login: (user: User, accessToken: string, refreshToken?: string) => {
@@ -57,6 +57,7 @@ export const useUserStore = create<UserStore>()(
                     isAuthenticated: true,
                     isLoading: false,
                 })
+                setAuthCookies(accessToken, refreshToken)
             },
 
             logout: () => {
@@ -67,6 +68,7 @@ export const useUserStore = create<UserStore>()(
                     isAuthenticated: false,
                     isLoading: false,
                 })
+                removeAuthCookies()
             },
 
             clearUser: () => {
@@ -81,8 +83,7 @@ export const useUserStore = create<UserStore>()(
             },
         }),
         {
-            name: 'user-storage', // Storage key
-            // Only persist these fields
+            name: 'user-storage',
             partialize: (state) => ({
                 user: state.user,
                 accessToken: state.accessToken,
@@ -93,7 +94,6 @@ export const useUserStore = create<UserStore>()(
     )
 )
 
-// Selectors for easier usage
 export const useUser = () => useUserStore((state) => state.user)
 export const useAccessToken = () => useUserStore((state) => state.accessToken)
 export const useIsAuthenticated = () =>

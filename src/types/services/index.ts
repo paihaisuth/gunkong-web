@@ -3,7 +3,7 @@ import type { AxiosPromise } from 'axios'
 export type Response<T> = {
     error?: {
         code: never
-        message: string
+        description: string
     }
     data?: {
         title: string
