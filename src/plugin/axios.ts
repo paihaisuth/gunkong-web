@@ -1,5 +1,7 @@
 import axios from 'axios'
 import type { AxiosResponse } from 'axios'
+import { useUserStore } from '@/stores/useUserStore'
+import { refreshTokenApi } from '@/services/login/login'
 
 let isRefreshing = false
 let failedQueue: Array<{
@@ -24,6 +26,10 @@ const createAxiosInstance = () => {
 
     const instance = axios.create({
         baseURL: apiBaseUrl,
+        timeout: 10000,
+        headers: {
+            'Content-Type': 'application/json',
+        },
     })
 
     instance.interceptors.request.use(
@@ -82,7 +88,9 @@ const createAxiosInstance = () => {
                 } catch (err) {
                     processQueue(err, null)
                     clearAuthToken()
-                    window.location.href = '/login'
+                    if (typeof window !== 'undefined') {
+                        window.location.href = '/login'
+                    }
                     return Promise.reject(err)
                 } finally {
                     isRefreshing = false
@@ -98,22 +106,52 @@ const createAxiosInstance = () => {
 
 // Helper functions that you need to implement based on your auth system
 function getAuthToken(): string | null {
-    // TODO: Get token from your Zustand store
-    // Example: return useUserStore.getState().accessToken
-    return null
+    try {
+        return useUserStore.getState().accessToken
+    } catch (error) {
+        console.error('Error getting auth token:', error)
+        return null
+    }
 }
 
 async function handleRefreshToken(): Promise<string> {
-    // TODO: Implement token refresh logic
-    // This should call your refresh token endpoint and return new access token
-    throw new Error('Token refresh not implemented')
+    try {
+        const currentRefreshToken = useUserStore.getState().refreshToken
+
+        if (!currentRefreshToken) {
+            throw new Error('No refresh token available')
+        }
+
+        try {
+            const response = await refreshTokenApi(currentRefreshToken)
+
+            if (response.data?.data?.item?.accessToken) {
+                const { setTokens } = useUserStore.getState()
+                const newAccessToken = response.data.data.item.accessToken
+                const newRefreshToken = response.data.data.item.refreshToken
+
+                setTokens(newAccessToken, newRefreshToken)
+
+                console.log('Token refresh successful')
+                return newAccessToken
+            } else {
+                console.error(
+                    'Invalid refresh token response structure:',
+                    response.data
+                )
+                throw new Error('Invalid refresh token response')
+            }
+        } catch (error) {
+            console.error('Token refresh failed:', error)
+            const { logout } = useUserStore.getState()
+            logout()
+            throw error
+        }
+    } catch (error) {
+        console.error('Token refresh failed:', error)
+        throw error
+    }
 }
 
-function clearAuthToken(): void {
-    // TODO: Clear token from your Zustand store
-    // Example: useUserStore.getState().logout()
-}
-
-// Create and export the axios instance
 export const api = createAxiosInstance()
 export default api
