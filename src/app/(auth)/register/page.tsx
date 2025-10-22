@@ -133,9 +133,9 @@ export default function RegisterPage() {
                                 <CardTitle className="text-3xl font-bold bg-gradient-to-r from-primary to-green-600 bg-clip-text text-transparent">
                                     สร้างบัญชีใหม่
                                 </CardTitle>
-                                <CardDescription className="text-base text-muted-foreground">
+                                {/* <CardDescription className="text-base text-muted-foreground">
                                     เข้าร่วมกับเราและเริ่มต้นการเทรด P2P
-                                </CardDescription>
+                                </CardDescription> */}
                                 <div className="flex items-center justify-center gap-2 mt-4">
                                     <ShBadge
                                         variant="secondary"
@@ -255,31 +255,20 @@ export default function RegisterPage() {
                                                                         ? 'text'
                                                                         : 'password'
                                                                 }
-                                                                placeholder="สร้างรหัสผ่าน"
-                                                                className="pl-10 pr-10 h-12 border-2 focus:border-primary transition-all duration-200 rounded-xl"
-                                                                {...field}
-                                                            />
-                                                            <button
-                                                                type="button"
-                                                                onClick={() =>
+                                                                rightIcon={
+                                                                    showPassword
+                                                                        ? 'eye-off'
+                                                                        : 'eye'
+                                                                }
+                                                                onRightIconClick={() =>
                                                                     setShowPassword(
                                                                         !showPassword
                                                                     )
                                                                 }
-                                                                className="absolute right-3 top-3 text-muted-foreground hover:text-primary transition-colors p-1 rounded-md hover:bg-primary/10"
-                                                            >
-                                                                {showPassword ? (
-                                                                    <ShIcon
-                                                                        name="eye-off"
-                                                                        className="h-4 w-4"
-                                                                    />
-                                                                ) : (
-                                                                    <ShIcon
-                                                                        name="eye"
-                                                                        className="h-4 w-4"
-                                                                    />
-                                                                )}
-                                                            </button>
+                                                                placeholder="สร้างรหัสผ่าน"
+                                                                className="pl-10 pr-10 h-12 border-2 focus:border-primary transition-all duration-200 rounded-xl"
+                                                                {...field}
+                                                            />
                                                         </div>
                                                     </FormControl>
                                                     <FormMessage />
@@ -302,31 +291,20 @@ export default function RegisterPage() {
                                                                         ? 'text'
                                                                         : 'password'
                                                                 }
+                                                                rightIcon={
+                                                                    showPassword
+                                                                        ? 'eye-off'
+                                                                        : 'eye'
+                                                                }
+                                                                onRightIconClick={() =>
+                                                                    setShowPassword(
+                                                                        !showPassword
+                                                                    )
+                                                                }
                                                                 placeholder="ยืนยันรหัสผ่าน"
                                                                 className="pl-10 pr-10 h-12 border-2 focus:border-primary transition-all duration-200 rounded-xl"
                                                                 {...field}
                                                             />
-                                                            <button
-                                                                type="button"
-                                                                onClick={() =>
-                                                                    setShowConfirmPassword(
-                                                                        !showConfirmPassword
-                                                                    )
-                                                                }
-                                                                className="absolute right-3 top-3 text-muted-foreground hover:text-primary transition-colors p-1 rounded-md hover:bg-primary/10"
-                                                            >
-                                                                {showConfirmPassword ? (
-                                                                    <ShIcon
-                                                                        name="eye-off"
-                                                                        className="h-4 w-4"
-                                                                    />
-                                                                ) : (
-                                                                    <ShIcon
-                                                                        name="eye"
-                                                                        className="h-4 w-4"
-                                                                    />
-                                                                )}
-                                                            </button>
                                                         </div>
                                                     </FormControl>
                                                     <FormMessage />

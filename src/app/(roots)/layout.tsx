@@ -167,7 +167,7 @@ function Sidebar({ className }: { className?: string }) {
                             </div>
                             <div className="flex-1 min-w-0 text-left">
                                 <p className="text-sm font-medium truncate">
-                                    TraderTH001
+                                    Test User
                                 </p>
                                 <p className="text-xs text-muted-foreground truncate">
                                     ออนไลน์ • ยืนยันแล้ว ⭐
