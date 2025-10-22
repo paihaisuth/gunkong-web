@@ -3,9 +3,10 @@ import { persist } from 'zustand/middleware'
 import { setAuthCookies, removeAuthCookies } from '@/lib/auth-cookies'
 
 interface User {
-    id: string
     email: string
-    name: string
+    fullName: string
+    phone: string
+    username: string
 }
 
 interface UserState {
