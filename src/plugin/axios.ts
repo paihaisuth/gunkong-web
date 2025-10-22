@@ -153,5 +153,11 @@ async function handleRefreshToken(): Promise<string> {
     }
 }
 
+function clearAuthToken(): void {
+    // TODO: Clear token from your Zustand store
+    // Example: useUserStore.getState().logout()
+}
+
+// Create and export the axios instance
 export const api = createAxiosInstance()
 export default api

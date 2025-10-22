@@ -6,6 +6,7 @@ interface IconProps {
     name: string
     size?: number | string
     strokeWidth?: number | string
+    color?: string
     className?: HTMLAttributes<HTMLElement>['className']
 }
 
@@ -13,6 +14,7 @@ export function ShIcon({
     name,
     size = 24,
     strokeWidth = 2,
+    color,
     className,
 }: IconProps) {
     const convertToPascalCase = (str: string) => {
@@ -20,7 +22,7 @@ export function ShIcon({
             .split('-')
             .map(
                 (word) =>
-                    word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
+                    word.charAt(0).toUpperCase() + word.slice(1).toLowerCase(),
             )
             .join('')
     }
@@ -36,7 +38,7 @@ export function ShIcon({
         !(pascalCaseName in LucideIcons)
     ) {
         console.warn(
-            `Icon "${name}" (${pascalCaseName}) not found in lucide-react, using AlertCircle fallback`
+            `Icon "${name}" (${pascalCaseName}) not found in lucide-react, using AlertCircle fallback`,
         )
     }
 
@@ -44,6 +46,7 @@ export function ShIcon({
         <IconComponent
             size={size}
             strokeWidth={strokeWidth}
+            color={color}
             className={cn(className)}
         />
     )
