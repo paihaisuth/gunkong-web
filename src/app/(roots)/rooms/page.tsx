@@ -47,7 +47,7 @@ export default function Room() {
             setIsLoadingRooms(true)
             const response = await fetchRooms()
             setRooms(response.data.data?.items || [])
-        } catch (error) {
+        } catch {
             toast('เกิดข้อผิดพลาดในการโหลดข้อมูลห้อง')
             hasInitialized.current = false
         } finally {
