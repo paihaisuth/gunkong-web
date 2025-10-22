@@ -307,9 +307,9 @@ export default function Home() {
                             )}
                         </div>
 
-                        <pre className="bg-muted p-4 rounded-lg overflow-auto text-sm">
+                        {/* <pre className="bg-muted p-4 rounded-lg overflow-auto text-sm">
                             {JSON.stringify(searchResults, null, 2)}
-                        </pre>
+                        </pre> */}
                     </CardContent>
                 </Card>
             )}
