@@ -59,3 +59,24 @@ export const searchRooms = (roomCode: SearchRoomShcema): ApiResponse<Room> =>
 export const fetchRooms = async (): ApiResponse<Room[]> => {
     return api.get('/room/list')
 }
+
+const createRoomSchema = z.object({
+    itemTitle: z.string().min(1, 'Item title is required'),
+    itemDescription: z.string().optional(),
+    quantity: z.number().min(1, 'Quantity must be at least 1'),
+    itemPriceCents: z.number().min(0, 'Item price must be at least 0'),
+    itemImages: z.array(z.string().url()).optional(),
+})
+
+export type CreateRoomSchema = z.infer<typeof createRoomSchema>
+
+export const createRoom = (payload: CreateRoomSchema): ApiResponse<Room> =>
+    callApi(payload, createRoomSchema, (data) => {
+        return api.post('/room', {
+            itemTitle: data.itemTitle,
+            itemDescription: data.itemDescription,
+            quantity: data.quantity,
+            itemPriceCents: data.itemPriceCents,
+            itemImages: data.itemImages,
+        })
+    })

@@ -18,23 +18,65 @@ import {
 import { ShButton } from '@/components/ui/button'
 import { ShInput } from '@/components/ui/input'
 import { toast } from 'sonner'
-import { fetchRooms } from '@/services/room'
+import { fetchRooms, createRoom } from '@/services/room'
 import { useState, useEffect, useRef } from 'react'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { z } from 'zod'
+import {
+    Form,
+    FormControl,
+    FormField,
+    FormItem,
+    FormLabel,
+    FormMessage,
+} from '@/components/ui/form'
 import { ShIcon } from '@/components/ui/icon'
 import { ShBadge } from '@/components/ui/badge'
 import type { Room } from '@/services/room'
 
+const createRoomSchema = z.object({
+    itemTitle: z
+        .string()
+        .min(1, 'กรุณาป้อนชื่อสินค้า')
+        .max(100, 'ชื่อสินค้าต้องไม่เกิน 100 ตัวอักษร'),
+    price: z
+        .string()
+        .min(1, 'กรุณาป้อนราคา')
+        .refine(
+            (val) => !isNaN(parseFloat(val)) && parseFloat(val) > 0,
+            'กรุณาป้อนราคาที่ถูกต้อง'
+        ),
+    quantity: z
+        .string()
+        .min(1, 'กรุณาป้อนจำนวน')
+        .refine(
+            (val) => !isNaN(parseInt(val)) && parseInt(val) > 0,
+            'กรุณาป้อนจำนวนที่ถูกต้อง'
+        ),
+    description: z
+        .string()
+        .max(500, 'รายละเอียดต้องไม่เกิน 500 ตัวอักษร')
+        .optional(),
+})
+
+type CreateRoomFormValues = z.infer<typeof createRoomSchema>
+
 export default function Room() {
     const [isCreateRoomOpen, setIsCreateRoomOpen] = useState(false)
-    const [createRoomForm, setCreateRoomForm] = useState({
-        itemTitle: '',
-        price: '',
-        description: '',
-    })
-    const [isCreatingRoom, setIsCreatingRoom] = useState(false)
     const [rooms, setRooms] = useState<Room[]>([])
     const [isLoadingRooms, setIsLoadingRooms] = useState(true)
     const hasInitialized = useRef(false)
+
+    const form = useForm<CreateRoomFormValues>({
+        resolver: zodResolver(createRoomSchema),
+        defaultValues: {
+            itemTitle: '',
+            price: '',
+            quantity: '1',
+            description: '',
+        },
+    })
 
     const getRooms = async () => {
         if (hasInitialized.current) {
@@ -55,36 +97,34 @@ export default function Room() {
         }
     }
 
-    const handleCreateRoom = async (e: React.FormEvent) => {
-        e.preventDefault()
-
-        if (!createRoomForm.itemTitle.trim()) {
-            toast('กรุณาป้อนชื่อสินค้า')
-            return
-        }
-
-        if (
-            !createRoomForm.price.trim() ||
-            parseFloat(createRoomForm.price) <= 0
-        ) {
-            toast('กรุณาป้อนราคาที่ถูกต้อง')
-            return
-        }
-
-        setIsCreatingRoom(true)
+    const handleCreateRoom = async (data: CreateRoomFormValues) => {
         try {
-            // TODO: Call API to create room
-            console.log('Creating room with data:', createRoomForm)
+            const priceInCents = Math.round(parseFloat(data.price) * 100)
+
+            const payload = {
+                itemTitle: data.itemTitle.trim(),
+                itemDescription: data.description?.trim() || undefined,
+                quantity: parseInt(data.quantity),
+                itemPriceCents: priceInCents,
+                itemImages: [],
+            }
+
+            const response = await createRoom(payload)
+
+            if (response.data.error) {
+                toast('เกิดข้อผิดพลาด: ' + response.data.error.description)
+                return
+            }
+
             toast('สร้างห้องสำเร็จ!')
             setIsCreateRoomOpen(false)
-            setCreateRoomForm({ itemTitle: '', price: '', description: '' })
-            // Reload rooms after creating
+            form.reset()
+
+            hasInitialized.current = false
             getRooms()
         } catch (error) {
             console.error('Error creating room:', error)
             toast('เกิดข้อผิดพลาดในการสร้างห้อง')
-        } finally {
-            setIsCreatingRoom(false)
         }
     }
 
@@ -171,97 +211,138 @@ export default function Room() {
                                     </DialogDescription>
                                 </DialogHeader>
 
-                                <form
-                                    onSubmit={handleCreateRoom}
-                                    className="space-y-4"
-                                >
-                                    <div className="space-y-2">
-                                        <label className="text-sm font-medium">
-                                            ชื่อสินค้า{' '}
-                                            <span className="text-destructive">
-                                                *
-                                            </span>
-                                        </label>
-                                        <ShInput
-                                            placeholder="ป้อนชื่อสินค้าที่ต้องการขาย"
-                                            type="text"
-                                            value={createRoomForm.itemTitle}
-                                            onChange={(e) =>
-                                                setCreateRoomForm((prev) => ({
-                                                    ...prev,
-                                                    itemTitle: e.target.value,
-                                                }))
-                                            }
-                                            maxLength={100}
-                                            required
+                                <Form {...form}>
+                                    <form
+                                        onSubmit={form.handleSubmit(
+                                            handleCreateRoom
+                                        )}
+                                        className="space-y-4"
+                                    >
+                                        <FormField
+                                            control={form.control}
+                                            name="itemTitle"
+                                            render={({ field }) => (
+                                                <FormItem>
+                                                    <FormLabel>
+                                                        ชื่อสินค้า{' '}
+                                                        <span className="text-destructive">
+                                                            *
+                                                        </span>
+                                                    </FormLabel>
+                                                    <FormControl>
+                                                        <ShInput
+                                                            placeholder="ป้อนชื่อสินค้าที่ต้องการขาย"
+                                                            type="text"
+                                                            maxLength={100}
+                                                            {...field}
+                                                        />
+                                                    </FormControl>
+                                                    <FormMessage />
+                                                </FormItem>
+                                            )}
                                         />
-                                    </div>
 
-                                    <div className="space-y-2">
-                                        <label className="text-sm font-medium">
-                                            ราคา (บาท){' '}
-                                            <span className="text-destructive">
-                                                *
-                                            </span>
-                                        </label>
-                                        <ShInput
-                                            placeholder="0.00"
-                                            type="number"
-                                            value={createRoomForm.price}
-                                            onChange={(e) =>
-                                                setCreateRoomForm((prev) => ({
-                                                    ...prev,
-                                                    price: e.target.value,
-                                                }))
-                                            }
-                                            min="0"
-                                            step="0.01"
-                                            required
+                                        <FormField
+                                            control={form.control}
+                                            name="price"
+                                            render={({ field }) => (
+                                                <FormItem>
+                                                    <FormLabel>
+                                                        ราคา (บาท){' '}
+                                                        <span className="text-destructive">
+                                                            *
+                                                        </span>
+                                                    </FormLabel>
+                                                    <FormControl>
+                                                        <ShInput
+                                                            placeholder="0.00"
+                                                            type="number"
+                                                            min="0"
+                                                            step="0.01"
+                                                            {...field}
+                                                        />
+                                                    </FormControl>
+                                                    <FormMessage />
+                                                </FormItem>
+                                            )}
                                         />
-                                    </div>
 
-                                    <div className="space-y-2">
-                                        <label className="text-sm font-medium">
-                                            รายละเอียดสินค้า (ไม่บังคับ)
-                                        </label>
-                                        <textarea
-                                            placeholder="รายละเอียดเพิ่มเติมเกี่ยวกับสินค้า..."
-                                            className="w-full p-3 border border-input bg-background rounded-md text-sm resize-none"
-                                            rows={3}
-                                            value={createRoomForm.description}
-                                            onChange={(e) =>
-                                                setCreateRoomForm((prev) => ({
-                                                    ...prev,
-                                                    description: e.target.value,
-                                                }))
-                                            }
-                                            maxLength={500}
+                                        <FormField
+                                            control={form.control}
+                                            name="quantity"
+                                            render={({ field }) => (
+                                                <FormItem>
+                                                    <FormLabel>
+                                                        จำนวน{' '}
+                                                        <span className="text-destructive">
+                                                            *
+                                                        </span>
+                                                    </FormLabel>
+                                                    <FormControl>
+                                                        <ShInput
+                                                            placeholder="1"
+                                                            type="number"
+                                                            min="1"
+                                                            step="1"
+                                                            {...field}
+                                                        />
+                                                    </FormControl>
+                                                    <FormMessage />
+                                                </FormItem>
+                                            )}
                                         />
-                                    </div>
 
-                                    <div className="flex gap-2 pt-4">
-                                        <ShButton
-                                            type="button"
-                                            variant="outline"
-                                            onClick={() =>
-                                                setIsCreateRoomOpen(false)
-                                            }
-                                            className="flex-1"
-                                            disabled={isCreatingRoom}
-                                        >
-                                            ยกเลิก
-                                        </ShButton>
-                                        <ShButton
-                                            type="submit"
-                                            className="flex-1"
-                                            disabled={isCreatingRoom}
-                                        >
-                                            {isCreatingRoom
-                                                ? 'กำลังสร้าง...'
-                                                : 'สร้างห้อง'}
-                                        </ShButton>
-                                    </div>
-                                </form>
+                                        <FormField
+                                            control={form.control}
+                                            name="description"
+                                            render={({ field }) => (
+                                                <FormItem>
+                                                    <FormLabel>
+                                                        รายละเอียดสินค้า
+                                                        (ไม่บังคับ)
+                                                    </FormLabel>
+                                                    <FormControl>
+                                                        <textarea
+                                                            placeholder="รายละเอียดเพิ่มเติมเกี่ยวกับสินค้า..."
+                                                            className="w-full p-3 border border-input bg-background rounded-md text-sm resize-none"
+                                                            rows={3}
+                                                            maxLength={500}
+                                                            {...field}
+                                                        />
+                                                    </FormControl>
+                                                    <FormMessage />
+                                                </FormItem>
+                                            )}
+                                        />
+
+                                        <div className="flex gap-2 pt-4">
+                                            <ShButton
+                                                type="button"
+                                                variant="outline"
+                                                onClick={() =>
+                                                    setIsCreateRoomOpen(false)
+                                                }
+                                                className="flex-1"
+                                                disabled={
+                                                    form.formState.isSubmitting
+                                                }
+                                            >
+                                                ยกเลิก
+                                            </ShButton>
+                                            <ShButton
+                                                type="submit"
+                                                className="flex-1"
+                                                disabled={
+                                                    form.formState.isSubmitting
+                                                }
+                                            >
+                                                {form.formState.isSubmitting
+                                                    ? 'กำลังสร้าง...'
+                                                    : 'สร้างห้อง'}
+                                            </ShButton>
+                                        </div>
+                                    </form>
+                                </Form>
                             </DialogContent>
                         </Dialog>
                     </div>
