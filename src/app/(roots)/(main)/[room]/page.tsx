@@ -2,6 +2,7 @@
 
 import { useParams, useRouter } from 'next/navigation'
 import { useState, useEffect } from 'react'
+import Image from 'next/image'
 import { ShButton } from '@/components/ui/button'
 import {
     Card,
@@ -14,7 +15,6 @@ import { ShBadge } from '@/components/ui/badge'
 import { ShIcon } from '@/components/ui/icon'
 import { toast } from 'sonner'
 import { searchRooms } from '@/services/room'
-import { useUserStore } from '@/stores/useUserStore'
 
 interface RoomData {
     id: string
@@ -52,7 +52,6 @@ interface RoomData {
 export default function RoomPage() {
     const params = useParams()
     const router = useRouter()
-    const { user } = useUserStore()
     const [roomData, setRoomData] = useState<RoomData | null>(null)
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
@@ -279,11 +278,13 @@ export default function RoomPage() {
                                             key={index}
                                             className="aspect-square bg-muted rounded-lg overflow-hidden"
                                         >
-                                            <img
+                                            <Image
                                                 src={image}
                                                 alt={`รูปภาพสินค้า ${
                                                     index + 1
                                                 }`}
+                                                width={400}
+                                                height={400}
                                                 className="w-full h-full object-cover hover:scale-105 transition-transform cursor-pointer"
                                                 onError={(e) => {
                                                     e.currentTarget.style.display =

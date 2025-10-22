@@ -4,13 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { ShButton } from '@/components/ui/button'
-import {
-    Card,
-    CardContent,
-    CardDescription,
-    CardHeader,
-    CardTitle,
-} from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { ShInput } from '@/components/ui/input'
 import { ShBadge } from '@/components/ui/badge'
 import {
@@ -292,13 +286,13 @@ export default function RegisterPage() {
                                                                         : 'password'
                                                                 }
                                                                 rightIcon={
-                                                                    showPassword
+                                                                    showConfirmPassword
                                                                         ? 'eye-off'
                                                                         : 'eye'
                                                                 }
                                                                 onRightIconClick={() =>
-                                                                    setShowPassword(
-                                                                        !showPassword
+                                                                    setShowConfirmPassword(
+                                                                        !showConfirmPassword
                                                                     )
                                                                 }
                                                                 placeholder="ยืนยันรหัสผ่าน"

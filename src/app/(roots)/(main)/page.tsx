@@ -1,6 +1,5 @@
 'use client'
 
-import { useUserStore } from '@/stores/useUserStore'
 import { ShButton } from '@/components/ui/button'
 import {
     Card,
@@ -13,16 +12,15 @@ import {
 import { ShBadge } from '@/components/ui/badge'
 import { toast } from 'sonner'
 import { ShInput } from '@/components/ui/input'
-import { searchRooms } from '@/services/room'
+import { searchRooms, Room } from '@/services/room'
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 
 export default function Home() {
-    const { user, accessToken, logout, isAuthenticated } = useUserStore()
     const router = useRouter()
     const [roomCode, setRoomCode] = useState('')
     const [isSearching, setIsSearching] = useState(false)
-    const [searchResults, setSearchResults] = useState<any>(null)
+    const [searchResults, setSearchResults] = useState<Room | null>(null)
     const [searchError, setSearchError] = useState<string | null>(null)
     const [recentSearches, setRecentSearches] = useState<string[]>([])
 
@@ -62,6 +60,11 @@ export default function Home() {
         setSearchError(null)
         try {
             const response = await searchRooms({ roomCode: code.toUpperCase() })
+            if (!response.data.data?.item) {
+                toast('ไม่พบห้องที่ระบุ')
+                return
+            }
+
             setSearchResults(response.data.data?.item)
             saveRecentSearch(code)
             console.log(response.data.data?.item)
@@ -238,14 +241,11 @@ export default function Home() {
                                                         {searchResults.itemTitle ||
                                                             'ไม่ระบุชื่อสินค้า'}
                                                     </p>
-                                                    {searchResults.seller
-                                                        ?.username && (
+                                                    {searchResults.sellerId && (
                                                         <p className="text-sm text-muted-foreground">
                                                             ผู้ขาย:{' '}
                                                             {
-                                                                searchResults
-                                                                    .seller
-                                                                    .username
+                                                                searchResults.sellerId
                                                             }
                                                         </p>
                                                     )}

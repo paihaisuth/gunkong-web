@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, useCallback, useEffect } from 'react'
 import { usePathname } from 'next/navigation'
 import Link from 'next/link'
 import { ShButton } from '@/components/ui/button'
@@ -25,7 +25,6 @@ import {
 import { cn } from '@/lib/utils'
 import { useUserStore } from '@/stores/useUserStore'
 import { useRouter } from 'next/navigation'
-import { useEffect } from 'react'
 import { fetchUserProfile } from '@/services/profile/profile'
 import { toast } from 'sonner'
 
@@ -447,7 +446,7 @@ function TopNavigation() {
 export default function RootsLayout({ children }: LayoutProps) {
     const { setUser, user, isAuthenticated, accessToken } = useUserStore()
 
-    const getUserProfile = async () => {
+    const getUserProfile = useCallback(async () => {
         try {
             console.log('Fetching user profile...')
             const res = await fetchUserProfile()
@@ -461,13 +460,13 @@ export default function RootsLayout({ children }: LayoutProps) {
         } catch (error) {
             console.error('Failed to fetch user profile:', error)
         }
-    }
+    }, [setUser])
 
     useEffect(() => {
         if (isAuthenticated && accessToken && !user) {
             getUserProfile()
         }
-    }, [isAuthenticated, accessToken, user])
+    }, [isAuthenticated, accessToken, user, getUserProfile])
 
     return (
         <div className="flex h-screen bg-background">
