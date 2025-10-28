@@ -2,6 +2,7 @@ import axios from 'axios'
 import type { AxiosResponse } from 'axios'
 import { useUserStore } from '@/stores/useUserStore'
 import { refreshTokenApi } from '@/services/login/login'
+import { isTokenExpired } from '@/lib/token-utils'
 
 let isRefreshing = false
 let failedQueue: Array<{
@@ -20,6 +21,15 @@ function processQueue(error: unknown, token: string | null = null) {
     failedQueue = []
 }
 
+function redirectToLogin() {
+    if (typeof window !== 'undefined') {
+        const currentPath = window.location.pathname
+        if (currentPath !== '/login') {
+            window.location.href = `/login?redirectTo=${encodeURIComponent(currentPath)}`
+        }
+    }
+}
+
 const createAxiosInstance = () => {
     const apiBaseUrl =
         process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3000/api'
@@ -33,11 +43,30 @@ const createAxiosInstance = () => {
     })
 
     instance.interceptors.request.use(
-        function (config) {
+        async function (config) {
             const token = getAuthToken()
 
             if (token) {
-                config.headers['Authorization'] = `Bearer ${token}`
+                if (isTokenExpired(token)) {
+                    const refreshToken = useUserStore.getState().refreshToken
+                    
+                    if (!refreshToken || isTokenExpired(refreshToken)) {
+                        clearAuthToken()
+                        redirectToLogin()
+                        return Promise.reject(new Error('Token expired'))
+                    }
+
+                    try {
+                        const newToken = await handleRefreshToken()
+                        config.headers['Authorization'] = `Bearer ${newToken}`
+                    } catch (error) {
+                        clearAuthToken()
+                        redirectToLogin()
+                        return Promise.reject(error)
+                    }
+                } else {
+                    config.headers['Authorization'] = `Bearer ${token}`
+                }
             }
             return config
         },
@@ -88,13 +117,16 @@ const createAxiosInstance = () => {
                 } catch (err) {
                     processQueue(err, null)
                     clearAuthToken()
-                    if (typeof window !== 'undefined') {
-                        window.location.href = '/login'
-                    }
+                    redirectToLogin()
                     return Promise.reject(err)
                 } finally {
                     isRefreshing = false
                 }
+            }
+
+            if (error.response && error.response.status === 401) {
+                clearAuthToken()
+                redirectToLogin()
             }
 
             return Promise.reject(error)
@@ -154,8 +186,8 @@ async function handleRefreshToken(): Promise<string> {
 }
 
 function clearAuthToken(): void {
-    // TODO: Clear token from your Zustand store
-    // Example: useUserStore.getState().logout()
+    const { logout } = useUserStore.getState()
+    logout()
 }
 
 // Create and export the axios instance

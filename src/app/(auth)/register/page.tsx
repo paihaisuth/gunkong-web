@@ -127,9 +127,6 @@ export default function RegisterPage() {
                                 <CardTitle className="text-3xl font-bold bg-gradient-to-r from-primary to-green-600 bg-clip-text text-transparent">
                                     สร้างบัญชีใหม่
                                 </CardTitle>
-                                {/* <CardDescription className="text-base text-muted-foreground">
-                                    เข้าร่วมกับเราและเริ่มต้นการเทรด P2P
-                                </CardDescription> */}
                                 <div className="flex items-center justify-center gap-2 mt-4">
                                     <ShBadge
                                         variant="secondary"
