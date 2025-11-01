@@ -154,7 +154,7 @@ export default function Home() {
 
                             {searchError && (
                                 <div className="text-sm text-destructive bg-destructive/10 p-2 rounded">
-                                    {searchError}
+                                    ไม่พบห้องที่ระบุ
                                 </div>
                             )}
 
