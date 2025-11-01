@@ -8,14 +8,6 @@ import { ShIcon } from '@/components/ui/icon'
 import { ShBadge } from '@/components/ui/badge'
 import { ThemeToggle } from '@/components/provider/theme-toggle'
 import {
-    Sheet,
-    SheetContent,
-    SheetDescription,
-    SheetHeader,
-    SheetTitle,
-    SheetTrigger,
-} from '@/components/ui/sheet'
-import {
     DropdownMenu,
     DropdownMenuContent,
     DropdownMenuItem,
@@ -204,8 +196,53 @@ function Sidebar({ className }: { className?: string }) {
     )
 }
 
+function BottomNav() {
+    const pathname = usePathname()
+
+    return (
+        <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-50 border-t bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+            <div className="flex items-center justify-around h-16 px-2">
+                {navigationConfig.map((item, index) => {
+                    const isActive = pathname === item.href
+                    return (
+                        <Link
+                            key={index}
+                            href={item.href}
+                            className={cn(
+                                'flex flex-col items-center justify-center gap-1 px-3 py-2 rounded-lg transition-colors flex-1 max-w-[120px]',
+                                isActive
+                                    ? 'text-primary'
+                                    : 'text-muted-foreground hover:text-foreground'
+                            )}
+                        >
+                            <ShIcon
+                                name={item.icon}
+                                size={20}
+                                className={cn(
+                                    'transition-colors',
+                                    isActive && 'text-primary'
+                                )}
+                            />
+                            <span className="text-xs font-medium">
+                                {item.label}
+                            </span>
+                            {item.badge && (
+                                <ShBadge
+                                    variant="secondary"
+                                    className="absolute top-1 right-1 text-[10px] h-4 px-1 min-w-4"
+                                >
+                                    {item.badge}
+                                </ShBadge>
+                            )}
+                        </Link>
+                    )
+                })}
+            </div>
+        </nav>
+    )
+}
+
 function TopNavigation() {
-    const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false)
     const pathname = usePathname()
     const router = useRouter()
 
@@ -239,33 +276,19 @@ function TopNavigation() {
 
     return (
         <header className="sticky top-0 z-40 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-            <div className="flex h-14 items-center gap-4 px-4 lg:px-6">
-                <Sheet
-                    open={isMobileSidebarOpen}
-                    onOpenChange={setIsMobileSidebarOpen}
-                >
-                    <SheetTrigger asChild>
-                        <ShButton
-                            variant="ghost"
-                            size="icon"
-                            className="lg:hidden"
-                        >
-                            <ShIcon name="menu" size={20} />
-                            <span className="sr-only">เปิดเมนู</span>
-                        </ShButton>
-                    </SheetTrigger>
-                    <SheetContent side="left" className="w-64 p-0">
-                        <SheetHeader className="sr-only">
-                            <SheetTitle>Navigation Menu</SheetTitle>
-                            <SheetDescription>
-                                Main navigation menu for the application
-                            </SheetDescription>
-                        </SheetHeader>
-                        <Sidebar />
-                    </SheetContent>
-                </Sheet>
+            <div className="flex h-14 items-center justify-between gap-4 px-4 lg:px-6">
+                <div className="lg:hidden flex items-center gap-2">
+                    <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
+                        <ShIcon
+                            name="share-2"
+                            size={18}
+                            className="text-primary-foreground"
+                        />
+                    </div>
+                    <span className="font-semibold text-lg">Gunkong</span>
+                </div>
 
-                <div className="flex-1">
+                <div className="hidden lg:block flex-1">
                     <nav className="flex items-center space-x-1 text-sm">
                         {breadcrumbs.map((crumb, index) => (
                             <div key={crumb.href} className="flex items-center">
@@ -292,8 +315,7 @@ function TopNavigation() {
                         ))}
                     </nav>
                 </div>
-
-                <div className="flex items-center gap-2">
+                <div className="flex p-2 items-center">
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                             <ShButton
@@ -382,7 +404,7 @@ function TopNavigation() {
                             <ShButton
                                 variant="ghost"
                                 size="icon"
-                                className="hidden lg:flex"
+                                className="flex"
                             >
                                 <ShIcon name="user" size={20} />
                                 <span className="sr-only">บัญชีผู้ใช้</span>
@@ -427,7 +449,8 @@ function TopNavigation() {
 }
 
 export default function RootsLayout({ children }: LayoutProps) {
-    const { setUser, user, isAuthenticated, accessToken, logout } = useUserStore()
+    const { setUser, user, isAuthenticated, accessToken, logout } =
+        useUserStore()
     const router = useRouter()
 
     const getUserProfile = useCallback(async () => {
@@ -469,9 +492,11 @@ export default function RootsLayout({ children }: LayoutProps) {
             <div className="flex-1 flex flex-col overflow-hidden">
                 <TopNavigation />
 
-                <main className="flex-1 overflow-y-auto">
+                <main className="flex-1 overflow-y-auto pb-16 lg:pb-0">
                     <div className="p-4 lg:p-6">{children}</div>
                 </main>
+
+                <BottomNav />
             </div>
         </div>
     )

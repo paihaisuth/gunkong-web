@@ -234,7 +234,7 @@ export default function RoomPage() {
                                         </div>
                                         <div className="flex justify-between">
                                             <span className="text-muted-foreground">
-                                                สกุลเงิน:
+                                                ราคา:
                                             </span>
                                             <span>{roomData.currency}</span>
                                         </div>
