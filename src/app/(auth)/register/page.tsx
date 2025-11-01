@@ -19,39 +19,12 @@ import {
 import Link from 'next/link'
 import { useState } from 'react'
 import { ShIcon } from '@/components/ui/icon'
+import { register, registerSchema } from '@/services/login/register'
+import { toast } from 'sonner'
+import { useRouter } from 'next/navigation'
 
-const registerSchema = z
-    .object({
-        fullName: z
-            .string()
-            .min(2, 'Full name must be at least 2 characters')
-            .max(100, 'Full name must not exceed 100 characters'),
-        email: z
-            .string()
-            .email('Please enter a valid email address')
-            .toLowerCase(),
-        phone: z
-            .string()
-            .regex(/^\+?[\d\s\-\(\)]+$/, 'Please enter a valid phone number')
-            .min(10, 'Phone number is too short')
-            .optional()
-            .or(z.literal('')),
-        password: z
-            .string()
-            .min(8, 'Password must be at least 8 characters')
-            .regex(
-                /(?=.*[a-z])/,
-                'Password must contain at least one lowercase letter'
-            )
-            .regex(
-                /(?=.*[A-Z])/,
-                'Password must contain at least one uppercase letter'
-            )
-            .regex(/(?=.*\d)/, 'Password must contain at least one number')
-            .regex(
-                /(?=.*[@$!%*?&])/,
-                'Password must contain at least one special character'
-            ),
+const formSchema = registerSchema
+    .extend({
         confirmPassword: z.string(),
         agreeToTerms: z
             .boolean()
@@ -66,17 +39,19 @@ const registerSchema = z
         path: ['confirmPassword'],
     })
 
-type RegisterFormValues = z.infer<typeof registerSchema>
+type RegisterFormValues = z.infer<typeof formSchema>
 
 export default function RegisterPage() {
     const [showPassword, setShowPassword] = useState(false)
     const [showConfirmPassword, setShowConfirmPassword] = useState(false)
+    const router = useRouter()
 
     const form = useForm<RegisterFormValues>({
-        resolver: zodResolver(registerSchema),
+        resolver: zodResolver(formSchema),
         defaultValues: {
             fullName: '',
             email: '',
+            username: '',
             phone: '',
             password: '',
             confirmPassword: '',
@@ -85,12 +60,21 @@ export default function RegisterPage() {
         },
     })
 
-    function onSubmit(data: RegisterFormValues) {
+    async function onSubmit(data: RegisterFormValues) {
         try {
-            console.log(data)
-            alert('Registration functionality will be implemented later!')
+            await register({
+                email: data.email,
+                fullName: data.fullName,
+                username: data.username,
+                phone: data.phone,
+                password: data.password,
+            })
+
+            toast.success('Registration successful!')
+            router.push('/login')
         } catch (error) {
-            console.error(error)
+            console.error('Registration error:', error)
+            toast.error('Registration failed. Please try again.')
         }
     }
 
@@ -127,9 +111,6 @@ export default function RegisterPage() {
                                 <CardTitle className="text-3xl font-bold bg-gradient-to-r from-primary to-green-600 bg-clip-text text-transparent">
                                     สร้างบัญชีใหม่
                                 </CardTitle>
-                                {/* <CardDescription className="text-base text-muted-foreground">
-                                    เข้าร่วมกับเราและเริ่มต้นการเทรด P2P
-                                </CardDescription> */}
                                 <div className="flex items-center justify-center gap-2 mt-4">
                                     <ShBadge
                                         variant="secondary"
@@ -211,13 +192,37 @@ export default function RegisterPage() {
 
                                     <FormField
                                         control={form.control}
+                                        name="username"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormControl>
+                                                    <div className="relative group">
+                                                        <ShInput
+                                                            label="ชื่อผู้ใช้"
+                                                            leftIcon="at-sign"
+                                                            placeholder="username"
+                                                            className="pl-10 h-12 border-2 focus:border-primary transition-all duration-200 rounded-xl"
+                                                            {...field}
+                                                        />
+                                                    </div>
+                                                </FormControl>
+                                                <FormDescription className="text-xs text-muted-foreground">
+                                                    ชื่อผู้ใช้ที่ไม่ซ้ำกันสำหรับบัญชีของคุณ
+                                                </FormDescription>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+
+                                    <FormField
+                                        control={form.control}
                                         name="phone"
                                         render={({ field }) => (
                                             <FormItem>
                                                 <FormControl>
                                                     <div className="relative group">
                                                         <ShInput
-                                                            label="เบอร์โทรศัพท์ (ไม่บังคับ)"
+                                                            label="เบอร์โทรศัพท์"
                                                             leftIcon="phone"
                                                             placeholder="08x-xxx-xxxx"
                                                             className="pl-10 h-12 border-2 focus:border-primary transition-all duration-200 rounded-xl"
@@ -318,15 +323,10 @@ export default function RegisterPage() {
                                             </p>
                                         </div>
                                         <ul className="space-y-1 ml-6">
-                                            <li>• อย่างน้อย 8 ตัวอักษร</li>
+                                            <li>• อย่างน้อย 6 ตัวอักษร</li>
                                             <li>
                                                 •
-                                                ตัวพิมพ์ใหญ่และตัวพิมพ์เล็กอย่างน้อย
-                                                1 ตัว
-                                            </li>
-                                            <li>
-                                                • ตัวเลขและอักขระพิเศษ (@$!%*?&)
-                                                อย่างน้อย 1 ตัว
+                                                ใช้อักขระที่ปลอดภัยและจดจำได้ง่าย
                                             </li>
                                         </ul>
                                     </div>

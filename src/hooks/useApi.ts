@@ -1,6 +1,7 @@
 import { useState, useCallback } from 'react'
 import axios, { AxiosInstance } from 'axios'
 import { useUserStore } from '@/stores/useUserStore'
+import { useRouter } from 'next/navigation'
 
 interface IHttpOptions {
     baseUrl: null
@@ -77,6 +78,7 @@ export const useApi = <IResponse>(options: Options) => {
         initFetchState = true,
     } = options
     const { payload } = options
+    const router = useRouter()
 
     const [state, setState] = useState({
         isFetching: initFetchState,
@@ -118,6 +120,11 @@ export const useApi = <IResponse>(options: Options) => {
                             console.error(
                                 'Authentication failed. Please login again.'
                             )
+                        }
+
+                        const currentPath = window.location.pathname
+                        if (currentPath !== '/login') {
+                            router.push(`/login?redirectTo=${encodeURIComponent(currentPath)}`)
                         }
                     }
 
@@ -203,6 +210,7 @@ export const useApi = <IResponse>(options: Options) => {
             notifyError,
             onOk,
             onError,
+            router,
         ]
     )
 

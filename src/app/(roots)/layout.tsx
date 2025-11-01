@@ -27,6 +27,7 @@ import { useUserStore } from '@/stores/useUserStore'
 import { useRouter } from 'next/navigation'
 import { fetchUserProfile } from '@/services/profile/profile'
 import { toast } from 'sonner'
+import { isTokenExpired } from '@/lib/token-utils'
 
 interface LayoutProps {
     children: React.ReactNode
@@ -292,25 +293,7 @@ function TopNavigation() {
                     </nav>
                 </div>
 
-                {/* <div className="hidden md:flex relative w-64">
-                    <ShIcon
-                        name="search"
-                        size={16}
-                        className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground"
-                    />
-                    <input
-                        type="search"
-                        placeholder="ค้นหา..."
-                        className="w-full pl-9 pr-4 py-2 text-sm bg-background border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring focus:border-ring"
-                    />
-                </div> */}
-
                 <div className="flex items-center gap-2">
-                    {/* <ShButton variant="ghost" size="icon" className="md:hidden">
-                        <ShIcon name="search" size={20} />
-                        <span className="sr-only">ค้นหา</span>
-                    </ShButton> */}
-
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                             <ShButton
@@ -444,7 +427,8 @@ function TopNavigation() {
 }
 
 export default function RootsLayout({ children }: LayoutProps) {
-    const { setUser, user, isAuthenticated, accessToken } = useUserStore()
+    const { setUser, user, isAuthenticated, accessToken, logout } = useUserStore()
+    const router = useRouter()
 
     const getUserProfile = useCallback(async () => {
         try {
@@ -463,10 +447,18 @@ export default function RootsLayout({ children }: LayoutProps) {
     }, [setUser])
 
     useEffect(() => {
+        if (accessToken && isTokenExpired(accessToken)) {
+            console.log('Token expired, logging out...')
+            logout()
+            const currentPath = window.location.pathname
+            router.push(`/login?redirectTo=${encodeURIComponent(currentPath)}`)
+            return
+        }
+
         if (isAuthenticated && accessToken && !user) {
             getUserProfile()
         }
-    }, [isAuthenticated, accessToken, user, getUserProfile])
+    }, [isAuthenticated, accessToken, user, getUserProfile, logout, router])
 
     return (
         <div className="flex h-screen bg-background">
