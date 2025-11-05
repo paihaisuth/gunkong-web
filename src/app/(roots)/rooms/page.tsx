@@ -315,6 +315,15 @@ export default function Room() {
                                             )}
                                         />
 
+                                        <div className="flex text-xs text-red-600">
+                                            <span>
+                                                * หมายเหตุ:
+                                                ราคาที่ท่านใส่จะมีการบวกเพิ่มค่าธรรมเนียมการซื้อขาย
+                                                15%
+                                                ซึ่งจะถูกบวกหลังจากที่ท่านใส่ราคาสินค้าของท่านโดยอัตโนมัติ
+                                            </span>
+                                        </div>
+
                                         <div className="flex gap-2 pt-4">
                                             <ShButton
                                                 type="button"
