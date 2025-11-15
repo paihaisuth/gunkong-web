@@ -12,12 +12,20 @@ export function middleware(request: NextRequest) {
         return NextResponse.next()
     }
 
-    const publicRoutes = ['/login', '/register', '/test']
+    const publicRoutes = ['/login', '/register']
     const isPublicRoute = publicRoutes.some((route) =>
         pathname.startsWith(route)
     )
 
     const accessToken = request.cookies.get('access-token')?.value
+    const otpSession = request.cookies.get('otp-session')?.value
+
+    if (pathname.startsWith('/verify-otp')) {
+        if (!otpSession) {
+            return NextResponse.redirect(new URL('/register', request.url))
+        }
+        return NextResponse.next()
+    }
 
     if (!isPublicRoute && !accessToken) {
         const loginUrl = new URL('/login', request.url)

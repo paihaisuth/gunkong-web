@@ -7,6 +7,7 @@ import { ShButton } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { ShInput } from '@/components/ui/input'
 import { ShBadge } from '@/components/ui/badge'
+import { setOtpSessionCookie } from '@/lib/auth-cookies'
 import {
     Form,
     FormControl,
@@ -62,7 +63,7 @@ export default function RegisterPage() {
 
     async function onSubmit(data: RegisterFormValues) {
         try {
-            await register({
+            const response = await register({
                 email: data.email,
                 fullName: data.fullName,
                 username: data.username,
@@ -70,11 +71,23 @@ export default function RegisterPage() {
                 password: data.password,
             })
 
-            toast.success('Registration successful!')
-            router.push('/login')
+            if (response.data.error) {
+                toast.error(
+                    response.data.error.description ||
+                        'การลงทะเบียนล้มเหลว กรุณาลองใหม่อีกครั้ง'
+                )
+                return
+            }
+
+            setOtpSessionCookie(data.email)
+            toast.success(
+                response.data.data?.item?.message ||
+                    'ลงทะเบียนสำเร็จ! กรุณายืนยัน OTP ที่ส่งไปยังอีเมลของคุณ'
+            )
+            router.push(`/verify-otp?email=${encodeURIComponent(data.email)}`)
         } catch (error) {
             console.error('Registration error:', error)
-            toast.error('Registration failed. Please try again.')
+            toast.error('การลงทะเบียนล้มเหลว กรุณาลองใหม่อีกครั้ง')
         }
     }
 
