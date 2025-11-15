@@ -80,3 +80,29 @@ export const createRoom = (payload: CreateRoomSchema): ApiResponse<Room> =>
             itemImages: data.itemImages,
         })
     })
+
+export const fetchCodeRoom = (payload: SearchRoomShcema): ApiResponse<Room> => {
+    return callApi(payload, searchRoomSchema, (data) => {
+        return api.get(`/room/${data.roomCode}`)
+    })
+}
+
+const updateRoomSchema = z.object({
+    roomId: z.string().min(1, 'Room ID is required'),
+    itemTitle: z.string().min(1, 'Item title is required').optional(),
+    itemDescription: z.string().optional(),
+    quantity: z.number().min(1, 'Quantity must be at least 1').optional(),
+    itemPriceCents: z
+        .number()
+        .min(0, 'Item price must be at least 0')
+        .optional(),
+    itemImages: z.array(z.string().url()).optional(),
+})
+
+export type UpdateRoomSchema = z.infer<typeof updateRoomSchema>
+
+export const updateRoom = (payload: UpdateRoomSchema): ApiResponse<Room> =>
+    callApi(payload, updateRoomSchema, (data) => {
+        const { roomId, ...updateData } = data
+        return api.patch(`/room/${roomId}`, updateData)
+    })
