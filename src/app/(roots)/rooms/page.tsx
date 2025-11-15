@@ -23,6 +23,7 @@ import { useState, useEffect, useRef } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
+import { useRouter } from 'next/navigation'
 import {
     Form,
     FormControl,
@@ -34,6 +35,7 @@ import {
 import { ShIcon } from '@/components/ui/icon'
 import { ShBadge } from '@/components/ui/badge'
 import type { Room } from '@/services/room'
+import { getStatusColor, getStatusText } from '@/lib/utils'
 
 const createRoomSchema = z.object({
     itemTitle: z
@@ -63,6 +65,7 @@ const createRoomSchema = z.object({
 type CreateRoomFormValues = z.infer<typeof createRoomSchema>
 
 export default function Room() {
+    const router = useRouter()
     const [isCreateRoomOpen, setIsCreateRoomOpen] = useState(false)
     const [rooms, setRooms] = useState<Room[]>([])
     const [isLoadingRooms, setIsLoadingRooms] = useState(true)
@@ -131,44 +134,6 @@ export default function Room() {
     useEffect(() => {
         getRooms()
     }, [])
-
-    const getStatusColor = (status: string) => {
-        switch (status) {
-            case 'CREATED':
-                return 'bg-blue-100 text-blue-800'
-            case 'PENDING':
-                return 'bg-yellow-100 text-yellow-800'
-            case 'CONFIRMED':
-                return 'bg-green-100 text-green-800'
-            case 'SHIPPED':
-                return 'bg-purple-100 text-purple-800'
-            case 'COMPLETED':
-                return 'bg-green-100 text-green-800'
-            case 'CANCELLED':
-                return 'bg-red-100 text-red-800'
-            default:
-                return 'bg-gray-100 text-gray-800'
-        }
-    }
-
-    const getStatusText = (status: string) => {
-        switch (status) {
-            case 'CREATED':
-                return 'สร้างแล้ว'
-            case 'PENDING':
-                return 'รอดำเนินการ'
-            case 'CONFIRMED':
-                return 'ยืนยันแล้ว'
-            case 'SHIPPED':
-                return 'จัดส่งแล้ว'
-            case 'COMPLETED':
-                return 'สำเร็จ'
-            case 'CANCELLED':
-                return 'ยกเลิก'
-            default:
-                return status
-        }
-    }
 
     const formatPrice = (priceCents: number) => {
         return (priceCents / 100).toLocaleString('th-TH', {
@@ -506,6 +471,11 @@ export default function Room() {
                                                     size="sm"
                                                     variant="outline"
                                                     className="flex-1"
+                                                    onClick={() =>
+                                                        router.push(
+                                                            `/rooms/${room.roomCode}`
+                                                        )
+                                                    }
                                                 >
                                                     <ShIcon
                                                         name="eye"
@@ -519,6 +489,11 @@ export default function Room() {
                                                         <ShButton
                                                             size="sm"
                                                             className="flex-1"
+                                                            onClick={() =>
+                                                                router.push(
+                                                                    `/rooms/${room.roomCode}/edit`
+                                                                )
+                                                            }
                                                         >
                                                             <ShIcon
                                                                 name="edit"
