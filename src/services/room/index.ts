@@ -12,6 +12,12 @@ type ItemStatus =
     | 'CANCELLED'
 type PaymentStatus = 'PENDING' | 'PAID' | 'VERIFIED' | 'FAILED'
 
+export interface RoomUser {
+    id: string
+    username: string
+    fullName: string
+}
+
 export interface Room {
     id: string
     roomCode: string
@@ -43,6 +49,9 @@ export interface Room {
     paymentStatus: PaymentStatus
     createdAt: string
     updatedAt: string
+    seller: RoomUser
+    buyer: RoomUser | null
+    creator: RoomUser
 }
 
 const searchRoomSchema = z.object({
