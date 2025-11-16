@@ -245,7 +245,9 @@ export default function Home() {
                                                         <p className="text-sm text-muted-foreground">
                                                             ผู้ขาย:{' '}
                                                             {
-                                                                searchResults.sellerId
+                                                                searchResults
+                                                                    .seller
+                                                                    .fullName
                                                             }
                                                         </p>
                                                     )}

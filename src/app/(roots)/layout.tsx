@@ -42,17 +42,17 @@ interface SidebarItemProps {
 const navigationConfig: NavigationItem[] = [
     {
         icon: 'home',
-        label: 'หน้าหลัก',
+        label: 'ซื้อ',
         href: '/',
     },
     {
         icon: 'store',
-        label: 'ห้องซื้อขาย',
+        label: 'ขาย',
         href: '/rooms',
     },
     {
         icon: 'history',
-        label: 'ประวัติการซื้อขาย',
+        label: 'ประวัติ',
         href: '/history',
     },
 ]
@@ -120,7 +120,7 @@ function SidebarItem({ item, isActive, level = 0 }: SidebarItemProps) {
 function Sidebar({ className }: { className?: string }) {
     const pathname = usePathname()
     const router = useRouter()
-    const { logout } = useUserStore()
+    const { logout, user } = useUserStore()
 
     const handleLogout = () => {
         logout()
@@ -159,7 +159,7 @@ function Sidebar({ className }: { className?: string }) {
                             </div>
                             <div className="flex-1 min-w-0 text-left">
                                 <p className="text-sm font-medium truncate">
-                                    Test User
+                                    {user?.username || 'ผู้ใช้ไม่ระบุชื่อ'}
                                 </p>
                                 <p className="text-xs text-muted-foreground truncate">
                                     ออนไลน์ • ยืนยันแล้ว ⭐
@@ -186,7 +186,12 @@ function Sidebar({ className }: { className?: string }) {
                             onClick={handleLogout}
                             className="text-destructive"
                         >
-                            <ShIcon name="log-out" size={16} className="mr-2" />
+                            <ShIcon
+                                name="log-out"
+                                color="red"
+                                size={16}
+                                className="mr-2"
+                            />
                             ออกจากระบบ
                         </DropdownMenuItem>
                     </DropdownMenuContent>
@@ -434,7 +439,7 @@ function TopNavigation() {
                             >
                                 <ShIcon
                                     name="log-out"
-                                    color="white"
+                                    color="red"
                                     size={16}
                                     className="mr-2"
                                 />
