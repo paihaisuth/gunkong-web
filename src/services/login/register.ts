@@ -1,7 +1,6 @@
 import z from 'zod'
 import { api } from '@/plugin/axios'
 import { ApiResponse } from '@/types/services'
-import { LoginResponse } from '@/types/services/login'
 import { callApi } from '@/lib/service'
 
 export const registerSchema = z.object({
@@ -17,7 +16,19 @@ export const registerSchema = z.object({
 
 type RegisterSchema = z.infer<typeof registerSchema>
 
-export const register = (payload: RegisterSchema): ApiResponse<LoginResponse> =>
+export interface RegisterResponse {
+    success: boolean
+    title: string
+    message: string
+    data: {
+        email: string
+        requiresVerification: boolean
+    }
+}
+
+export const register = (
+    payload: RegisterSchema
+): ApiResponse<RegisterResponse> =>
     callApi(payload, registerSchema, (data) => {
         return api.post('/register', {
             email: data.email,
@@ -25,5 +36,6 @@ export const register = (payload: RegisterSchema): ApiResponse<LoginResponse> =>
             password: data.password,
             fullName: data.fullName,
             phone: data.phone,
+            role: 'USER',
         })
     })

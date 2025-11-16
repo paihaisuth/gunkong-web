@@ -5,6 +5,25 @@ import { ShLabel } from './label'
 import { cn } from '@/lib/utils'
 
 interface Props extends React.ComponentProps<'input'> {
+    type?:
+        | 'text'
+        | 'password'
+        | 'email'
+        | 'number'
+        | 'tel'
+        | 'url'
+        | 'search'
+        | 'date'
+        | 'datetime-local'
+        | 'time'
+        | 'month'
+        | 'week'
+        | 'file'
+        | 'color'
+        | 'range'
+        | 'hidden'
+        | 'checkbox'
+        | 'radio'
     leftIcon?: string
     rightIcon?: string
     label?: string
@@ -15,7 +34,7 @@ interface Props extends React.ComponentProps<'input'> {
 
 function ShInput({
     className,
-    type,
+    type = 'text',
     leftIcon,
     rightIcon,
     onRightIconClick,
