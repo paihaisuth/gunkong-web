@@ -10,8 +10,10 @@ export const getStatusColor = (status: string) => {
         case 'CREATED':
             return 'bg-blue-100 text-blue-800'
         case 'PENDING':
+        case 'PENDING_PAYMENT':
             return 'bg-yellow-100 text-yellow-800'
         case 'CONFIRMED':
+        case 'PAID':
             return 'bg-green-100 text-green-800'
         case 'SHIPPED':
             return 'bg-purple-100 text-purple-800'
@@ -30,8 +32,12 @@ export const getStatusText = (status: string) => {
             return 'สร้างแล้ว'
         case 'PENDING':
             return 'รอดำเนินการ'
+        case 'PENDING_PAYMENT':
+            return 'รอชำระเงิน'
         case 'CONFIRMED':
             return 'ยืนยันแล้ว'
+        case 'PAID':
+            return 'ชำระแล้ว'
         case 'SHIPPED':
             return 'จัดส่งแล้ว'
         case 'COMPLETED':

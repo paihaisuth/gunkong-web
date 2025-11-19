@@ -65,8 +65,31 @@ export const searchRooms = (roomCode: SearchRoomShcema): ApiResponse<Room> =>
         return api.get(`/room/${data.roomCode}`)
     })
 
-export const fetchRooms = async (): ApiResponse<Room[]> => {
-    return api.get('/room/list')
+interface FetchRoomsParams {
+    page?: number
+    perPage?: number
+    searchText?: string
+}
+
+export const fetchRooms = async (
+    params?: FetchRoomsParams
+): ApiResponse<Room[]> => {
+    const queryParams = new URLSearchParams()
+
+    if (params?.page) {
+        queryParams.append('page', params.page.toString())
+    }
+    if (params?.perPage) {
+        queryParams.append('perPage', params.perPage.toString())
+    }
+    if (params?.searchText) {
+        queryParams.append('searchText', params.searchText)
+    }
+
+    const queryString = queryParams.toString()
+    const url = queryString ? `/room/list?${queryString}` : '/room/list'
+
+    return api.get(url)
 }
 
 const createRoomSchema = z.object({
