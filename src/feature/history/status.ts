@@ -2,7 +2,6 @@ import {
     type TransactionStatus,
     type TransactionType,
     type RoomStatus,
-    type UserRole,
 } from '@/services/history'
 
 export const getTransactionTypeText = (type: TransactionType) => {
