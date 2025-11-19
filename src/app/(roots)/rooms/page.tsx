@@ -36,6 +36,15 @@ import { ShIcon } from '@/components/ui/icon'
 import { ShBadge } from '@/components/ui/badge'
 import type { Room } from '@/services/room'
 import { getStatusColor, getStatusText } from '@/lib/utils'
+import {
+    Pagination,
+    PaginationContent,
+    PaginationEllipsis,
+    PaginationItem,
+    PaginationLink,
+    PaginationNext,
+    PaginationPrevious,
+} from '@/components/ui/pagination'
 
 const createRoomSchema = z.object({
     itemTitle: z
@@ -69,7 +78,11 @@ export default function Room() {
     const [isCreateRoomOpen, setIsCreateRoomOpen] = useState(false)
     const [rooms, setRooms] = useState<Room[]>([])
     const [isLoadingRooms, setIsLoadingRooms] = useState(true)
-    const hasInitialized = useRef(false)
+    const [currentPage, setCurrentPage] = useState(1)
+    const [totalPages, setTotalPages] = useState(1)
+    const itemsPerPage = 9
+    const [searchText, setSearchText] = useState('')
+    const [debouncedSearchText, setDebouncedSearchText] = useState('')
 
     const form = useForm<CreateRoomFormValues>({
         resolver: zodResolver(createRoomSchema),
@@ -81,20 +94,24 @@ export default function Room() {
         },
     })
 
-    const getRooms = async () => {
-        if (hasInitialized.current) {
-            console.log('getRooms already called, skipping...')
-            return
-        }
-
+    const getRooms = async (page = 1, search = '') => {
         try {
-            hasInitialized.current = true
             setIsLoadingRooms(true)
-            const response = await fetchRooms()
+            const response = await fetchRooms({
+                page,
+                perPage: itemsPerPage,
+                searchText: search || undefined,
+            })
+
+            if (response.data.error) {
+                toast('เกิดข้อผิดพลาด: ' + response.data.error.description)
+                return
+            }
+
             setRooms(response.data.data?.items || [])
+            setTotalPages(response.data.data?.pagination?.totalPages || 1)
         } catch {
             toast('เกิดข้อผิดพลาดในการโหลดข้อมูลห้อง')
-            hasInitialized.current = false
         } finally {
             setIsLoadingRooms(false)
         }
@@ -123,8 +140,7 @@ export default function Room() {
             setIsCreateRoomOpen(false)
             form.reset()
 
-            hasInitialized.current = false
-            getRooms()
+            getRooms(currentPage, debouncedSearchText)
         } catch (error) {
             console.error('Error creating room:', error)
             toast('เกิดข้อผิดพลาดในการสร้างห้อง')
@@ -132,14 +148,56 @@ export default function Room() {
     }
 
     useEffect(() => {
-        getRooms()
-    }, [])
+        const timer = setTimeout(() => {
+            setDebouncedSearchText(searchText)
+            setCurrentPage(1)
+        }, 500)
+
+        return () => clearTimeout(timer)
+    }, [searchText])
+
+    useEffect(() => {
+        getRooms(currentPage, debouncedSearchText)
+    }, [currentPage, debouncedSearchText])
 
     const formatPrice = (priceCents: number) => {
         return (priceCents / 100).toLocaleString('th-TH', {
             minimumFractionDigits: 2,
             maximumFractionDigits: 2,
         })
+    }
+
+    const generatePageNumbers = () => {
+        const pages = []
+        const showEllipsisStart = currentPage > 3
+        const showEllipsisEnd = currentPage < totalPages - 2
+
+        if (totalPages <= 7) {
+            for (let i = 1; i <= totalPages; i++) {
+                pages.push(i)
+            }
+        } else {
+            pages.push(1)
+
+            if (showEllipsisStart) {
+                pages.push(-1)
+            }
+
+            const start = Math.max(2, currentPage - 1)
+            const end = Math.min(totalPages - 1, currentPage + 1)
+
+            for (let i = start; i <= end; i++) {
+                pages.push(i)
+            }
+
+            if (showEllipsisEnd) {
+                pages.push(-2)
+            }
+
+            pages.push(totalPages)
+        }
+
+        return pages
     }
 
     return (
@@ -324,19 +382,35 @@ export default function Room() {
             </Card>
 
             <div>
-                <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center justify-between mb-4 gap-4">
                     <h2 className="text-xl font-semibold">
                         ห้องซื้อขายทั้งหมด
                     </h2>
-                    <ShButton
-                        variant="outline"
-                        size="sm"
-                        onClick={getRooms}
-                        disabled={isLoadingRooms}
-                    >
-                        <ShIcon name="refresh-cw" size={16} className="mr-2" />
-                        {isLoadingRooms ? 'กำลังโหลด...' : 'รีเฟรช'}
-                    </ShButton>
+                    <div className="relative flex-1 max-w-md">
+                        <ShIcon
+                            name="search"
+                            size={16}
+                            className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
+                        />
+                        <ShInput
+                            placeholder="ค้นหาด้วยชื่อสินค้าหรือรหัสห้อง..."
+                            value={searchText}
+                            onChange={(e) => {
+                                setSearchText(e.target.value)
+                            }}
+                            className="pl-10 pr-10"
+                        />
+                        {searchText && (
+                            <button
+                                onClick={() => {
+                                    setSearchText('')
+                                }}
+                                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                            >
+                                <ShIcon name="x" size={16} />
+                            </button>
+                        )}
+                    </div>
                 </div>
 
                 {isLoadingRooms ? (
@@ -360,156 +434,179 @@ export default function Room() {
                     <Card className="p-8 text-center">
                         <div className="w-16 h-16 mx-auto bg-gray-100 rounded-full flex items-center justify-center mb-4">
                             <ShIcon
-                                name="store"
+                                name={debouncedSearchText ? 'search' : 'store'}
                                 size={24}
                                 className="text-gray-400"
                             />
                         </div>
                         <h3 className="font-medium text-lg mb-2">
-                            ยังไม่มีห้องซื้อขาย
+                            {debouncedSearchText
+                                ? 'ไม่พบห้องซื้อขายที่ค้นหา'
+                                : 'ยังไม่มีห้องซื้อขาย'}
                         </h3>
                         <p className="text-muted-foreground text-sm">
-                            เริ่มต้นสร้างห้องแรกของคุณได้เลย
+                            {debouncedSearchText
+                                ? 'ลองค้นหาด้วยคำอื่นหรือรหัสห้องอื่น'
+                                : 'เริ่มต้นสร้างห้องแรกของคุณได้เลย'}
                         </p>
                     </Card>
                 ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                        {rooms.map((room) => (
-                            <Card
-                                key={room.id}
-                                className="hover:shadow-md transition-shadow"
-                            >
-                                <CardHeader className="pb-3">
-                                    <div className="flex items-start justify-between">
-                                        <div className="flex-1 min-w-0">
-                                            <CardTitle className="text-lg line-clamp-2">
-                                                {room.itemTitle}
-                                            </CardTitle>
-                                            <CardDescription className="mt-1">
-                                                รหัสห้อง: {room.roomCode}
-                                            </CardDescription>
-                                        </div>
-                                        <ShBadge
-                                            variant="secondary"
-                                            className={`ml-2 ${getStatusColor(
-                                                room.status
-                                            )}`}
-                                        >
-                                            {getStatusText(room.status)}
-                                        </ShBadge>
-                                    </div>
-                                </CardHeader>
-                                <CardContent className="pt-0">
-                                    <div className="space-y-3">
-                                        {room.itemDescription && (
-                                            <p className="text-sm text-muted-foreground line-clamp-2">
-                                                {room.itemDescription}
-                                            </p>
-                                        )}
-
-                                        <div className="flex items-center justify-between">
-                                            <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                                                <ShIcon
-                                                    name="package"
-                                                    size={14}
-                                                />
-                                                <span>
-                                                    จำนวน: {room.quantity}
-                                                </span>
+                    <>
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                            {rooms.map((room) => (
+                                <Card
+                                    key={room.id}
+                                    className="hover:shadow-md transition-shadow cursor-pointer"
+                                    onClick={() =>
+                                        router.push(`/rooms/${room.roomCode}`)
+                                    }
+                                >
+                                    <CardHeader className="pb-3">
+                                        <div className="flex items-start justify-between">
+                                            <div className="flex-1 min-w-0">
+                                                <CardTitle className="text-lg line-clamp-2">
+                                                    {room.itemTitle}
+                                                </CardTitle>
+                                                <CardDescription className="mt-1">
+                                                    รหัสห้อง: {room.roomCode}
+                                                </CardDescription>
                                             </div>
-                                            <div className="text-right">
-                                                <div className="font-semibold text-lg text-primary">
-                                                    ฿
-                                                    {formatPrice(
-                                                        room.itemPriceCents
-                                                    )}
+                                            <ShBadge
+                                                variant="secondary"
+                                                className={`ml-2 ${getStatusColor(
+                                                    room.status
+                                                )}`}
+                                            >
+                                                {getStatusText(room.status)}
+                                            </ShBadge>
+                                        </div>
+                                    </CardHeader>
+                                    <CardContent className="pt-0">
+                                        <div className="space-y-3">
+                                            {room.itemDescription && (
+                                                <p className="text-sm text-muted-foreground line-clamp-2">
+                                                    {room.itemDescription}
+                                                </p>
+                                            )}
+
+                                            <div className="flex items-center justify-between">
+                                                <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                                                    <ShIcon
+                                                        name="package"
+                                                        size={14}
+                                                    />
+                                                    <span>
+                                                        จำนวน: {room.quantity}
+                                                    </span>
                                                 </div>
-                                                {room.shippingFeeCents > 0 && (
-                                                    <div className="text-xs text-muted-foreground">
-                                                        + ค่าจัดส่ง ฿
+                                                <div className="text-right">
+                                                    <div className="font-semibold text-lg text-primary">
+                                                        ฿
                                                         {formatPrice(
-                                                            room.shippingFeeCents
+                                                            room.itemPriceCents
                                                         )}
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div className="flex items-center justify-between text-xs text-muted-foreground">
+                                                <div className="flex items-center gap-1">
+                                                    <ShIcon
+                                                        name="calendar"
+                                                        size={12}
+                                                    />
+                                                    <span>
+                                                        {new Date(
+                                                            room.createdAt
+                                                        ).toLocaleDateString(
+                                                            'th-TH',
+                                                            {
+                                                                year: '2-digit',
+                                                                month: 'short',
+                                                                day: 'numeric',
+                                                            }
+                                                        )}
+                                                    </span>
+                                                </div>
+                                                {room.completedAt && (
+                                                    <div className="flex items-center gap-1 text-green-600">
+                                                        <ShIcon
+                                                            name="check-circle"
+                                                            size={12}
+                                                        />
+                                                        <span>สำเร็จ</span>
                                                     </div>
                                                 )}
                                             </div>
                                         </div>
+                                    </CardContent>
+                                </Card>
+                            ))}
+                        </div>
 
-                                        <div className="flex items-center justify-between text-xs text-muted-foreground">
-                                            <div className="flex items-center gap-1">
-                                                <ShIcon
-                                                    name="calendar"
-                                                    size={12}
-                                                />
-                                                <span>
-                                                    {new Date(
-                                                        room.createdAt
-                                                    ).toLocaleDateString(
-                                                        'th-TH',
-                                                        {
-                                                            year: '2-digit',
-                                                            month: 'short',
-                                                            day: 'numeric',
-                                                        }
-                                                    )}
-                                                </span>
-                                            </div>
-                                            {room.buyerId && (
-                                                <div className="flex items-center gap-1 text-green-600">
-                                                    <ShIcon
-                                                        name="user-check"
-                                                        size={12}
-                                                    />
-                                                    <span>มีผู้ซื้อแล้ว</span>
-                                                </div>
-                                            )}
-                                        </div>
+                        {totalPages > 1 && (
+                            <Pagination className="mt-6">
+                                <PaginationContent>
+                                    <PaginationItem>
+                                        <PaginationPrevious
+                                            onClick={(e) => {
+                                                e.preventDefault()
+                                                if (currentPage > 1) {
+                                                    setCurrentPage(
+                                                        currentPage - 1
+                                                    )
+                                                }
+                                            }}
+                                            className={
+                                                currentPage === 1
+                                                    ? 'pointer-events-none opacity-50'
+                                                    : 'cursor-pointer'
+                                            }
+                                        />
+                                    </PaginationItem>
 
-                                        <div className="pt-2 border-t">
-                                            <div className="flex gap-2">
-                                                <ShButton
-                                                    size="sm"
-                                                    variant="outline"
-                                                    className="flex-1"
-                                                    onClick={() =>
-                                                        router.push(
-                                                            `/rooms/${room.roomCode}`
-                                                        )
+                                    {generatePageNumbers().map((page, index) => (
+                                        <PaginationItem key={index}>
+                                            {page === -1 || page === -2 ? (
+                                                <PaginationEllipsis />
+                                            ) : (
+                                                <PaginationLink
+                                                    onClick={(e) => {
+                                                        e.preventDefault()
+                                                        setCurrentPage(page)
+                                                    }}
+                                                    isActive={
+                                                        currentPage === page
                                                     }
+                                                    className="cursor-pointer"
                                                 >
-                                                    <ShIcon
-                                                        name="eye"
-                                                        size={14}
-                                                        className="mr-1"
-                                                    />
-                                                    ดูรายละเอียด
-                                                </ShButton>
-                                                {room.status === 'CREATED' &&
-                                                    !room.buyerId && (
-                                                        <ShButton
-                                                            size="sm"
-                                                            className="flex-1"
-                                                            onClick={() =>
-                                                                router.push(
-                                                                    `/rooms/${room.roomCode}/edit`
-                                                                )
-                                                            }
-                                                        >
-                                                            <ShIcon
-                                                                name="edit"
-                                                                size={14}
-                                                                className="mr-1"
-                                                            />
-                                                            แก้ไขรายละเอียด
-                                                        </ShButton>
-                                                    )}
-                                            </div>
-                                        </div>
-                                    </div>
-                                </CardContent>
-                            </Card>
-                        ))}
-                    </div>
+                                                    {page}
+                                                </PaginationLink>
+                                            )}
+                                        </PaginationItem>
+                                    ))}
+
+                                    <PaginationItem>
+                                        <PaginationNext
+                                            onClick={(e) => {
+                                                e.preventDefault()
+                                                if (currentPage < totalPages) {
+                                                    setCurrentPage(
+                                                        currentPage + 1
+                                                    )
+                                                }
+                                            }}
+                                            className={
+                                                currentPage === totalPages
+                                                    ? 'pointer-events-none opacity-50'
+                                                    : 'cursor-pointer'
+                                            }
+                                        />
+                                    </PaginationItem>
+                                </PaginationContent>
+                            </Pagination>
+                        )}
+                    </>
                 )}
             </div>
         </div>

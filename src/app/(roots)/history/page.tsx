@@ -42,13 +42,16 @@ export default function HistoryPage() {
     const [roomPage, setRoomPage] = useState(1)
     const [totalTransactionPages, setTotalTransactionPages] = useState(1)
     const [totalRoomPages, setTotalRoomPages] = useState(1)
+    const [transactionSearchText, setTransactionSearchText] = useState('')
+    const [roomSearchText, setRoomSearchText] = useState('')
 
-    const getTransactionHistory = async (page = 1) => {
+    const getTransactionHistory = async (page = 1, searchText = '') => {
         try {
             setIsLoadingTransactions(true)
             const response = await fetchTransactionHistory({
                 page,
                 perPage: 10,
+                searchText: searchText || undefined,
             })
 
             if (response.data.error) {
@@ -68,12 +71,13 @@ export default function HistoryPage() {
         }
     }
 
-    const getJoinedRooms = async (page = 1) => {
+    const getJoinedRooms = async (page = 1, searchText = '') => {
         try {
             setIsLoadingRooms(true)
             const response = await fetchJoinedRooms({
                 page,
                 perPage: 10,
+                searchText: searchText || undefined,
             })
 
             if (response.data.error) {
@@ -92,12 +96,26 @@ export default function HistoryPage() {
     }
 
     useEffect(() => {
-        if (viewMode === 'transactions') {
-            getTransactionHistory(transactionPage)
-        } else {
-            getJoinedRooms(roomPage)
-        }
-    }, [viewMode, transactionPage, roomPage])
+        const timer = setTimeout(() => {
+            if (viewMode === 'transactions') {
+                getTransactionHistory(transactionPage, transactionSearchText)
+            } else {
+                getJoinedRooms(roomPage, roomSearchText)
+            }
+        }, 300)
+
+        return () => clearTimeout(timer)
+    }, [viewMode, transactionPage, roomPage, transactionSearchText, roomSearchText])
+
+    const handleTransactionSearch = (value: string) => {
+        setTransactionSearchText(value)
+        setTransactionPage(1)
+    }
+
+    const handleRoomSearch = (value: string) => {
+        setRoomSearchText(value)
+        setRoomPage(1)
+    }
 
     const formatPrice = (priceCents: number) => {
         return (priceCents / 100).toLocaleString('th-TH', {
@@ -158,7 +176,7 @@ export default function HistoryPage() {
                             variant="outline"
                             size="sm"
                             onClick={() =>
-                                getTransactionHistory(transactionPage)
+                                getTransactionHistory(transactionPage, transactionSearchText)
                             }
                             disabled={isLoadingTransactions}
                         >
@@ -169,6 +187,29 @@ export default function HistoryPage() {
                             />
                             {isLoadingTransactions ? 'กำลังโหลด...' : 'รีเฟรช'}
                         </ShButton>
+                    </div>
+
+                    <div className="relative">
+                        <ShIcon
+                            name="search"
+                            size={16}
+                            className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground"
+                        />
+                        <input
+                            type="text"
+                            placeholder="ค้นหาจากรายละเอียด, ชื่อสินค้า, รหัสห้อง..."
+                            value={transactionSearchText}
+                            onChange={(e) => handleTransactionSearch(e.target.value)}
+                            className="w-full pl-10 pr-4 py-2 border border-input rounded-md bg-background text-sm focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent"
+                        />
+                        {transactionSearchText && (
+                            <button
+                                onClick={() => handleTransactionSearch('')}
+                                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                            >
+                                <ShIcon name="x" size={16} />
+                            </button>
+                        )}
                     </div>
 
                     {isLoadingTransactions ? (
@@ -366,7 +407,7 @@ export default function HistoryPage() {
                         <ShButton
                             variant="outline"
                             size="sm"
-                            onClick={() => getJoinedRooms(roomPage)}
+                            onClick={() => getJoinedRooms(roomPage, roomSearchText)}
                             disabled={isLoadingRooms}
                         >
                             <ShIcon
@@ -376,6 +417,29 @@ export default function HistoryPage() {
                             />
                             {isLoadingRooms ? 'กำลังโหลด...' : 'รีเฟรช'}
                         </ShButton>
+                    </div>
+
+                    <div className="relative">
+                        <ShIcon
+                            name="search"
+                            size={16}
+                            className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground"
+                        />
+                        <input
+                            type="text"
+                            placeholder="ค้นหาจากชื่อสินค้า, รหัสห้อง..."
+                            value={roomSearchText}
+                            onChange={(e) => handleRoomSearch(e.target.value)}
+                            className="w-full pl-10 pr-4 py-2 border border-input rounded-md bg-background text-sm focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent"
+                        />
+                        {roomSearchText && (
+                            <button
+                                onClick={() => handleRoomSearch('')}
+                                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                            >
+                                <ShIcon name="x" size={16} />
+                            </button>
+                        )}
                     </div>
 
                     {isLoadingRooms ? (

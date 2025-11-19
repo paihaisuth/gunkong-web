@@ -8,6 +8,12 @@ export type Response<T> = {
     data?: {
         title: string
         description: string
+        pagination?: {
+            total: number
+            page: number
+            perPage: number
+            totalPages: number
+        }
     } & T
 }
 
