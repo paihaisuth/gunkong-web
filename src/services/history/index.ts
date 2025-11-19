@@ -1,6 +1,7 @@
 import z from 'zod'
 import { api } from '@/plugin/axios'
 import { callApi } from '@/lib/service'
+import type { ApiResponse } from '@/types/services'
 
 export type TransactionType =
     | 'PAYMENT'
@@ -53,7 +54,7 @@ export interface Transaction {
     amountCents: number
     currency: string
     description?: string
-    metadata?: Record<string, any>
+    metadata?: Record<string, unknown>
     paymentMethod?: string
     paymentReference?: string
     completedAt?: string
@@ -140,11 +141,11 @@ export interface JoinedRoomsResponse {
     pagination: Pagination
 }
 
-const buildQueryParams = (data: Record<string, any>): string => {
+const buildQueryParams = (data: Record<string, unknown>): string => {
     const queryParams = new URLSearchParams()
     Object.entries(data).forEach(([key, value]) => {
         if (value !== undefined && value !== null) {
-            queryParams.append(key, value.toString())
+            queryParams.append(key, String(value))
         }
     })
     return queryParams.toString()
@@ -164,7 +165,7 @@ export type FetchHistoryParams = z.input<typeof fetchHistorySchema>
 
 export const fetchCompleteHistory = (
     params: FetchHistoryParams = {}
-): Promise<any> => {
+): ApiResponse<CompleteHistoryResponse> => {
     return callApi(params, fetchHistorySchema, (data) => {
         return api.get(`/history?${data.queryString}`)
     })
@@ -201,7 +202,7 @@ export type FetchTransactionHistoryParams = z.input<
 
 export const fetchTransactionHistory = (
     params: FetchTransactionHistoryParams = {}
-): Promise<any> => {
+): ApiResponse<Transaction[]> => {
     return callApi(params, fetchTransactionHistorySchema, (data) => {
         return api.get(`/history/transactions?${data.queryString}`)
     })
@@ -235,7 +236,7 @@ export type FetchJoinedRoomsParams = z.input<typeof fetchJoinedRoomsSchema>
 
 export const fetchJoinedRooms = (
     params: FetchJoinedRoomsParams = {}
-): Promise<any> => {
+): ApiResponse<JoinedRoom[]> => {
     return callApi(params, fetchJoinedRoomsSchema, (data) => {
         return api.get(`/history/rooms?${data.queryString}`)
     })
