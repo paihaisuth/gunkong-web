@@ -3,6 +3,7 @@ import type { AxiosResponse } from 'axios'
 import { useUserStore } from '@/stores/useUserStore'
 import { refreshTokenApi } from '@/services/login/login'
 import { isTokenExpired } from '@/lib/token-utils'
+import { logger } from '@/lib/logger'
 
 let isRefreshing = false
 let failedQueue: Array<{
@@ -141,7 +142,7 @@ function getAuthToken(): string | null {
     try {
         return useUserStore.getState().accessToken
     } catch (error) {
-        console.error('Error getting auth token:', error)
+        logger.error('Error getting auth token:', error)
         return null
     }
 }
@@ -154,33 +155,28 @@ async function handleRefreshToken(): Promise<string> {
             throw new Error('No refresh token available')
         }
 
-        try {
-            const response = await refreshTokenApi(currentRefreshToken)
+        const response = await refreshTokenApi(currentRefreshToken)
 
-            if (response.data?.data?.item?.accessToken) {
-                const { setTokens } = useUserStore.getState()
-                const newAccessToken = response.data.data.item.accessToken
-                const newRefreshToken = response.data.data.item.refreshToken
+        if (response.data?.data?.item?.accessToken) {
+            const { setTokens } = useUserStore.getState()
+            const newAccessToken = response.data.data.item.accessToken
+            const newRefreshToken = response.data.data.item.refreshToken
 
-                setTokens(newAccessToken, newRefreshToken)
+            setTokens(newAccessToken, newRefreshToken)
 
-                console.log('Token refresh successful')
-                return newAccessToken
-            } else {
-                console.error(
-                    'Invalid refresh token response structure:',
-                    response.data
-                )
-                throw new Error('Invalid refresh token response')
-            }
-        } catch (error) {
-            console.error('Token refresh failed:', error)
-            const { logout } = useUserStore.getState()
-            logout()
-            throw error
+            logger.debug('Token refresh successful')
+            return newAccessToken
+        } else {
+            logger.error(
+                'Invalid refresh token response structure:',
+                response.data
+            )
+            throw new Error('Invalid refresh token response')
         }
     } catch (error) {
-        console.error('Token refresh failed:', error)
+        logger.error('Token refresh failed:', error)
+        const { logout } = useUserStore.getState()
+        logout()
         throw error
     }
 }

@@ -1,6 +1,7 @@
 'use client'
 
 import { useParams, useRouter } from 'next/navigation'
+import { logger } from '@/lib/logger'
 import { useState, useEffect } from 'react'
 import Image from 'next/image'
 import { ShButton } from '@/components/ui/button'
@@ -47,7 +48,7 @@ export default function RoomDetailsPage() {
                     setError('ไม่พบข้อมูลห้อง')
                 }
             } catch (err) {
-                console.error('Error fetching room:', err)
+                logger.error('Error fetching room:', err)
                 setError('เกิดข้อผิดพลาดในการดึงข้อมูลห้อง')
                 toast('ไม่สามารถดึงข้อมูลห้องได้')
             } finally {

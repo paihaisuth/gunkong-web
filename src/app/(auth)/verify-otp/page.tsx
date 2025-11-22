@@ -9,6 +9,7 @@ import { toast } from 'sonner'
 import { verifyOtp, resendOtp } from '@/services/otp'
 import { useUserStore } from '@/stores/useUserStore'
 import { removeOtpSessionCookie } from '@/lib/auth-cookies'
+import { logger } from '@/lib/logger'
 
 export default function VerifyOtpPage() {
     const router = useRouter()
@@ -89,7 +90,7 @@ export default function VerifyOtpPage() {
             return
         }
 
-        console.log('Verifying OTP:', otpToVerify)
+        logger.debug('Verifying OTP:', otpToVerify)
 
         setIsVerifying(true)
         try {
@@ -123,7 +124,7 @@ export default function VerifyOtpPage() {
                 }
             }
         } catch (error) {
-            console.error('OTP verification error:', error)
+            logger.error('OTP verification error:', error)
             toast.error('เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง')
             setOtp(['', '', '', '', '', ''])
             inputRefs.current[0]?.focus()
@@ -152,7 +153,7 @@ export default function VerifyOtpPage() {
                 inputRefs.current[0]?.focus()
             }
         } catch (error) {
-            console.error('Resend OTP error:', error)
+            logger.error('Resend OTP error:', error)
             toast.error('เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง')
         } finally {
             setIsResending(false)

@@ -2,20 +2,38 @@ export const AUTH_COOKIE_NAME = 'access-token'
 export const REFRESH_COOKIE_NAME = 'refresh-token'
 export const OTP_SESSION_COOKIE_NAME = 'otp-session'
 
+/**
+ * Cookie Security Options
+ *
+ * IMPORTANT SECURITY NOTE:
+ * - httpOnly is currently set to false to allow client-side JavaScript access
+ * - This is required for the current client-side authentication implementation
+ *
+ * RECOMMENDED IMPROVEMENT FOR PRODUCTION:
+ * - Set httpOnly: true to prevent XSS attacks
+ * - Move authentication logic to Server-Side (API routes)
+ * - Use Server Actions or API routes to set/read cookies
+ * - This requires refactoring the auth flow to use server-side session management
+ *
+ * Current security measures:
+ * - secure: true in production (requires HTTPS)
+ * - sameSite: 'strict' to prevent CSRF attacks
+ * - Limited maxAge to reduce exposure window
+ */
 const cookieOptions = {
-    httpOnly: false,
+    httpOnly: false, // TODO: Change to true and refactor to server-side auth
     secure: process.env.NODE_ENV === 'production',
-    sameSite: 'lax' as const,
+    sameSite: 'strict' as const, // Updated from 'lax' for better security
     path: '/',
-    maxAge: 60 * 60 * 24 * 7,
+    maxAge: 60 * 60 * 24 * 7, // 7 days
 }
 
 const otpSessionOptions = {
-    httpOnly: false,
+    httpOnly: false, // Temporary session, less critical
     secure: process.env.NODE_ENV === 'production',
-    sameSite: 'lax' as const,
+    sameSite: 'strict' as const, // Updated from 'lax' for better security
     path: '/',
-    maxAge: 60 * 15,
+    maxAge: 60 * 15, // 15 minutes
 }
 
 export const setAuthCookies = (accessToken: string, refreshToken?: string) => {

@@ -28,6 +28,7 @@ import {
     getTransactionTypeColor,
     getTransactionStatusText,
 } from '@/feature/history/status'
+import { logger } from '@/lib/logger'
 
 type ViewMode = 'transactions' | 'rooms'
 
@@ -65,7 +66,7 @@ export default function HistoryPage() {
             )
         } catch (error) {
             toast('เกิดข้อผิดพลาดในการโหลดประวัติธุรกรรม')
-            console.error('Error fetching transaction history:', error)
+            logger.error('Error fetching transaction history:', error)
         } finally {
             setIsLoadingTransactions(false)
         }
@@ -89,7 +90,7 @@ export default function HistoryPage() {
             setTotalRoomPages(response.data.data?.pagination?.totalPages || 1)
         } catch (error) {
             toast('เกิดข้อผิดพลาดในการโหลดห้องที่เข้าร่วม')
-            console.error('Error fetching joined rooms:', error)
+            logger.error('Error fetching joined rooms:', error)
         } finally {
             setIsLoadingRooms(false)
         }

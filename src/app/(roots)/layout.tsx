@@ -20,6 +20,7 @@ import { useRouter } from 'next/navigation'
 import { fetchUserProfile } from '@/services/profile/profile'
 import { toast } from 'sonner'
 import { isTokenExpired } from '@/lib/token-utils'
+import { logger } from '@/lib/logger'
 
 interface LayoutProps {
     children: React.ReactNode
@@ -460,7 +461,7 @@ export default function RootsLayout({ children }: LayoutProps) {
 
     const getUserProfile = useCallback(async () => {
         try {
-            console.log('Fetching user profile...')
+            logger.debug('Fetching user profile...')
             const res = await fetchUserProfile()
             if (!res.data.data?.item) {
                 toast('ไม่สามารถดึงข้อมูลโปรไฟล์ผู้ใช้ได้')
@@ -468,15 +469,15 @@ export default function RootsLayout({ children }: LayoutProps) {
             }
 
             setUser(res.data.data?.item)
-            console.log('User profile fetched:', res.data.data?.item)
+            logger.debug('User profile fetched:', res.data.data?.item)
         } catch (error) {
-            console.error('Failed to fetch user profile:', error)
+            logger.error('Failed to fetch user profile:', error)
         }
     }, [setUser])
 
     useEffect(() => {
         if (accessToken && isTokenExpired(accessToken)) {
-            console.log('Token expired, logging out...')
+            logger.debug('Token expired, logging out...')
             logout()
             const currentPath = window.location.pathname
             router.push(`/login?redirectTo=${encodeURIComponent(currentPath)}`)

@@ -1,6 +1,7 @@
 'use client'
 
 import { useParams, useRouter } from 'next/navigation'
+import { logger } from '@/lib/logger'
 import { useState, useEffect } from 'react'
 import { ShButton } from '@/components/ui/button'
 import { ShInput } from '@/components/ui/input'
@@ -108,7 +109,7 @@ export default function EditRoomPage() {
                     setError('ไม่พบข้อมูลห้อง')
                 }
             } catch (err) {
-                console.error('Error fetching room:', err)
+                logger.error('Error fetching room:', err)
                 setError('เกิดข้อผิดพลาดในการดึงข้อมูลห้อง')
                 toast('ไม่สามารถดึงข้อมูลห้องได้')
             } finally {
@@ -143,7 +144,7 @@ export default function EditRoomPage() {
             toast('อัปเดตห้องสำเร็จ!')
             router.push(`/rooms/${roomCode}`)
         } catch (error) {
-            console.error('Error updating room:', error)
+            logger.error('Error updating room:', error)
             toast('เกิดข้อผิดพลาดในการอัปเดตห้อง')
         }
     }

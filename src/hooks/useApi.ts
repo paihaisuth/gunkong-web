@@ -2,6 +2,8 @@ import { useState, useCallback } from 'react'
 import axios, { AxiosInstance } from 'axios'
 import { useUserStore } from '@/stores/useUserStore'
 import { useRouter } from 'next/navigation'
+import { logger } from '@/lib/logger'
+import { toast } from 'sonner'
 
 interface IHttpOptions {
     baseUrl: null
@@ -117,9 +119,8 @@ export const useApi = <IResponse>(options: Options) => {
                         useUserStore.getState().logout()
 
                         if (notifyError) {
-                            console.error(
-                                'Authentication failed. Please login again.'
-                            )
+                            toast.error('กรุณาเข้าสู่ระบบอีกครั้ง')
+                            logger.error('Authentication failed. Please login again.')
                         }
 
                         const currentPath = window.location.pathname
@@ -140,23 +141,24 @@ export const useApi = <IResponse>(options: Options) => {
                             const { message } = (error as any).response.data
                                 .error
 
-                            // TODO: Replace with your notification system
                             if (notifyError) {
-                                console.error(message)
+                                toast.error(message)
+                                logger.error('API error:', message)
                             }
                         }
                         // eslint-disable-next-line @typescript-eslint/no-explicit-any
                     } else if ((error as any).request) {
-                        // TODO: Replace with your notification system
                         if (notifyError) {
+                            toast.error('ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์')
                             // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                            console.error((error as any).request)
+                            logger.error('Network error:', (error as any).request)
                         }
                     } else {
-                        // TODO: Replace with your notification system
                         if (notifyError) {
                             // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                            console.error((error as any).message)
+                            const errorMessage = (error as any).message || 'เกิดข้อผิดพลาด'
+                            toast.error(errorMessage)
+                            logger.error('Request error:', errorMessage)
                         }
                     }
 

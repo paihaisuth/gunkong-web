@@ -1,6 +1,7 @@
 import React, { HTMLAttributes } from 'react'
 import { cn } from '@/lib/utils'
 import * as LucideIcons from 'lucide-react'
+import { logger } from '@/lib/logger'
 
 interface IconProps {
     name: string
@@ -37,7 +38,7 @@ export function ShIcon({
         process.env.NODE_ENV === 'development' &&
         !(pascalCaseName in LucideIcons)
     ) {
-        console.warn(
+        logger.warn(
             `Icon "${name}" (${pascalCaseName}) not found in lucide-react, using AlertCircle fallback`,
         )
     }

@@ -8,6 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { ShInput } from '@/components/ui/input'
 import { ShBadge } from '@/components/ui/badge'
 import { setOtpSessionCookie } from '@/lib/auth-cookies'
+import { logger } from '@/lib/logger'
 import {
     Form,
     FormControl,
@@ -86,7 +87,7 @@ export default function RegisterPage() {
             )
             router.push(`/verify-otp?email=${encodeURIComponent(data.email)}`)
         } catch (error) {
-            console.error('Registration error:', error)
+            logger.error('Registration error:', error)
             toast.error('การลงทะเบียนล้มเหลว กรุณาลองใหม่อีกครั้ง')
         }
     }

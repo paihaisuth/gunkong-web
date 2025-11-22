@@ -16,6 +16,7 @@ import {
     DialogTrigger,
 } from '@/components/ui/dialog'
 import { ShButton } from '@/components/ui/button'
+import { logger } from '@/lib/logger'
 import { ShInput } from '@/components/ui/input'
 import { toast } from 'sonner'
 import { fetchRooms, createRoom } from '@/services/room'
@@ -142,7 +143,7 @@ export default function Room() {
 
             getRooms(currentPage, debouncedSearchText)
         } catch (error) {
-            console.error('Error creating room:', error)
+            logger.error('Error creating room:', error)
             toast('เกิดข้อผิดพลาดในการสร้างห้อง')
         }
     }

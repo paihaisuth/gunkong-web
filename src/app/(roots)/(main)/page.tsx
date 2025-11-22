@@ -15,6 +15,7 @@ import { ShInput } from '@/components/ui/input'
 import { searchRooms, Room } from '@/services/room'
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import { logger } from '@/lib/logger'
 
 export default function Home() {
     const router = useRouter()
@@ -30,7 +31,7 @@ export default function Home() {
             try {
                 setRecentSearches(JSON.parse(saved))
             } catch (error) {
-                console.error('Error loading recent searches:', error)
+                logger.error('Error loading recent searches:', error)
             }
         }
     }, [])
@@ -67,10 +68,10 @@ export default function Home() {
 
             setSearchResults(response.data.data?.item)
             saveRecentSearch(code)
-            console.log(response.data.data?.item)
+            logger.debug('Room search result:', response.data.data?.item)
             toast('ค้นหาห้องสำเร็จ')
         } catch (error) {
-            console.error('Error fetching room:', error)
+            logger.error('Error fetching room:', error)
             const errorMessage =
                 error instanceof Error
                     ? error.message
@@ -308,10 +309,6 @@ export default function Home() {
                                 </div>
                             )}
                         </div>
-
-                        {/* <pre className="bg-muted p-4 rounded-lg overflow-auto text-sm">
-                            {JSON.stringify(searchResults, null, 2)}
-                        </pre> */}
                     </CardContent>
                 </Card>
             )}

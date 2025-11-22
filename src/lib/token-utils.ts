@@ -1,3 +1,5 @@
+import { logger } from './logger'
+
 export function decodeJWT(token: string): { exp?: number } | null {
     try {
         const parts = token.split('.')
@@ -11,7 +13,7 @@ export function decodeJWT(token: string): { exp?: number } | null {
         )
         return decoded
     } catch (error) {
-        console.error('Failed to decode JWT:', error)
+        logger.error('Failed to decode JWT:', error)
         return null
     }
 }
