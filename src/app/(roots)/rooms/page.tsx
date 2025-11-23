@@ -19,7 +19,7 @@ import { ShButton } from '@/components/ui/button'
 import { ShInput } from '@/components/ui/input'
 import { toast } from 'sonner'
 import { fetchRooms, createRoom } from '@/services/room'
-import { useRef, useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -565,26 +565,28 @@ export default function Room() {
                                         />
                                     </PaginationItem>
 
-                                    {generatePageNumbers().map((page, index) => (
-                                        <PaginationItem key={index}>
-                                            {page === -1 || page === -2 ? (
-                                                <PaginationEllipsis />
-                                            ) : (
-                                                <PaginationLink
-                                                    onClick={(e) => {
-                                                        e.preventDefault()
-                                                        setCurrentPage(page)
-                                                    }}
-                                                    isActive={
-                                                        currentPage === page
-                                                    }
-                                                    className="cursor-pointer"
-                                                >
-                                                    {page}
-                                                </PaginationLink>
-                                            )}
-                                        </PaginationItem>
-                                    ))}
+                                    {generatePageNumbers().map(
+                                        (page, index) => (
+                                            <PaginationItem key={index}>
+                                                {page === -1 || page === -2 ? (
+                                                    <PaginationEllipsis />
+                                                ) : (
+                                                    <PaginationLink
+                                                        onClick={(e) => {
+                                                            e.preventDefault()
+                                                            setCurrentPage(page)
+                                                        }}
+                                                        isActive={
+                                                            currentPage === page
+                                                        }
+                                                        className="cursor-pointer"
+                                                    >
+                                                        {page}
+                                                    </PaginationLink>
+                                                )}
+                                            </PaginationItem>
+                                        )
+                                    )}
 
                                     <PaginationItem>
                                         <PaginationNext

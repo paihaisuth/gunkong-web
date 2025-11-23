@@ -28,6 +28,7 @@ import { login } from '@/services/login/login'
 import { useUserStore } from '@/stores/useUserStore'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { ShIcon } from '@/components/ui/icon'
+import { Checkbox } from '@/components/ui/checkbox'
 
 const loginSchema = z.object({
     usernameEmail: z.string().min(1, 'Username or email is required'),
@@ -195,8 +196,8 @@ export default function LoginPage() {
                                                             leftIcon="lock"
                                                             rightIcon={
                                                                 showPassword
-                                                                    ? 'eye-off'
-                                                                    : 'eye'
+                                                                    ? 'eye'
+                                                                    : 'eye-off'
                                                             }
                                                             placeholder="กรุณากรอกรหัสผ่านของคุณ"
                                                             className="pl-10 pr-10 h-12 border-2 focus:border-primary transition-all duration-200 rounded-xl"
@@ -219,17 +220,15 @@ export default function LoginPage() {
                                             control={form.control}
                                             name="rememberMe"
                                             render={({ field }) => (
-                                                <FormItem className="flex items-center space-x-2">
+                                                <FormItem className="flex items-center">
                                                     <FormControl>
-                                                        <input
-                                                            type="checkbox"
+                                                        <Checkbox
                                                             checked={
                                                                 field.value
                                                             }
-                                                            onChange={
+                                                            onCheckedChange={
                                                                 field.onChange
                                                             }
-                                                            className="rounded border-border w-4 h-4 text-primary focus:ring-primary focus:ring-offset-0"
                                                         />
                                                     </FormControl>
                                                     <FormLabel className="text-sm font-normal cursor-pointer text-muted-foreground hover:text-foreground transition-colors">
