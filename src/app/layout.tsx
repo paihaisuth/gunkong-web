@@ -16,9 +16,26 @@ const geistMono = Geist_Mono({
 })
 
 export const metadata: Metadata = {
-    title: 'E-Commerce Web',
+    title: 'Gunkong P2P Commercial',
     description:
-        'Modern e-commerce built with Next.js, Tailwind CSS 4, and shadcn/ui',
+        'A secure peer-to-peer trading middleman platform that serves as a trusted intermediary between buyers and sellers. We handle payment verification and transaction approval to ensure safe and reliable P2P trading experiences.',
+    keywords: [
+        'P2P trading',
+        'peer-to-peer marketplace',
+        'secure trading',
+        'payment verification',
+        'transaction middleman',
+        'safe trading platform',
+        'buyer protection',
+        'seller protection',
+    ],
+    authors: [{ name: 'Gunkong' }],
+    openGraph: {
+        title: 'Gunkong P2P Commercial - Secure Peer-to-Peer Trading',
+        description:
+            'A secure peer-to-peer trading middleman platform that serves as a trusted intermediary between buyers and sellers. We handle payment verification and transaction approval to ensure safe and reliable P2P trading experiences.',
+        type: 'website',
+    },
 }
 
 export default function RootLayout({
