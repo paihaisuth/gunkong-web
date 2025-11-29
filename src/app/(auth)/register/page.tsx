@@ -7,7 +7,8 @@ import { ShButton } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { ShInput } from '@/components/ui/input'
 import { ShBadge } from '@/components/ui/badge'
-import { setOtpSessionCookie } from '@/lib/auth-cookies'
+// TODO: OTP functionality temporarily disabled - waiting for team budget approval
+// import { setOtpSessionCookie } from '@/lib/auth-cookies'
 import {
     Form,
     FormControl,
@@ -75,12 +76,16 @@ export default function RegisterPage() {
                 return
             }
 
-            setOtpSessionCookie(data.email)
-            toast.success(
-                response.data.data?.item?.message ||
-                    'ลงทะเบียนสำเร็จ! กรุณายืนยัน OTP ที่ส่งไปยังอีเมลของคุณ'
-            )
-            router.push(`/verify-otp?email=${encodeURIComponent(data.email)}`)
+            // TODO: OTP verification temporarily disabled - redirect to login instead
+            // setOtpSessionCookie(data.email)
+            // toast.success(
+            //     response.data.data?.item?.message ||
+            //         'ลงทะเบียนสำเร็จ! กรุณายืนยัน OTP ที่ส่งไปยังอีเมลของคุณ'
+            // )
+            // router.push(`/verify-otp?email=${encodeURIComponent(data.email)}`)
+
+            toast.success('ลงทะเบียนสำเร็จ! กรุณาเข้าสู่ระบบ')
+            router.push('/login')
         } catch (error) {
             console.error('Registration error:', error)
             toast.error('การลงทะเบียนล้มเหลว กรุณาลองใหม่อีกครั้ง')
