@@ -15,6 +15,10 @@ import { ShBadge } from '@/components/ui/badge'
 import { ShIcon } from '@/components/ui/icon'
 import { toast } from 'sonner'
 import { searchRooms } from '@/services/room'
+import { PaymentDialog } from './components/PaymentDialog'
+import { ShippingAddressDialog } from './components/ShippingAddressDialog'
+import { RoomActions } from './components/RoomActions'
+import { PaymentStatusCard } from './components/PaymentStatusCard'
 
 interface RoomData {
     id: string
@@ -58,35 +62,35 @@ export default function RoomPage() {
 
     const roomCode = params.room as string
 
-    useEffect(() => {
-        const fetchRoomData = async () => {
-            if (!roomCode) {
-                setError('ไม่พบรหัสห้อง')
-                setLoading(false)
-                return
-            }
-
-            try {
-                setLoading(true)
-                const response = await searchRooms({
-                    roomCode: roomCode.toUpperCase(),
-                })
-
-                if (response.data?.data?.item) {
-                    setRoomData(response.data.data.item)
-                    setError(null)
-                } else {
-                    setError('ไม่พบข้อมูลห้อง')
-                }
-            } catch (err) {
-                console.error('Error fetching room:', err)
-                setError('เกิดข้อผิดพลาดในการดึงข้อมูลห้อง')
-                toast.error('ไม่สามารถดึงข้อมูลห้องได้')
-            } finally {
-                setLoading(false)
-            }
+    const fetchRoomData = async () => {
+        if (!roomCode) {
+            setError('ไม่พบรหัสห้อง')
+            setLoading(false)
+            return
         }
 
+        try {
+            setLoading(true)
+            const response = await searchRooms({
+                roomCode: roomCode.toUpperCase(),
+            })
+
+            if (response.data?.data?.item) {
+                setRoomData(response.data.data.item)
+                setError(null)
+            } else {
+                setError('ไม่พบข้อมูลห้อง')
+            }
+        } catch (err) {
+            console.error('Error fetching room:', err)
+            setError('เกิดข้อผิดพลาดในการดึงข้อมูลห้อง')
+            toast.error('ไม่สามารถดึงข้อมูลห้องได้')
+        } finally {
+            setLoading(false)
+        }
+    }
+
+    useEffect(() => {
         fetchRoomData()
     }, [roomCode])
 
@@ -443,36 +447,36 @@ export default function RoomPage() {
                             <CardTitle>การดำเนินการ</CardTitle>
                         </CardHeader>
                         <CardContent className="space-y-3">
-                            <ShButton
-                                className="w-full"
-                                disabled={
-                                    roomData.status === 'COMPLETED' ||
-                                    roomData.status === 'CANCELLED'
-                                }
-                            >
-                                <ShIcon
-                                    name="credit-card"
-                                    size={16}
-                                    className="mr-2"
-                                />
-                                ชำระเงิน
-                            </ShButton>
+                            <RoomActions
+                                roomCode={roomData.roomCode}
+                                roomStatus={roomData.status}
+                                currentUserId="temp-user-id"
+                                sellerId={roomData.sellerId}
+                                buyerId={roomData.buyerId}
+                                onSuccess={() => {
+                                    fetchRoomData()
+                                }}
+                            />
 
-                            <ShButton
-                                variant="outline"
-                                className="w-full"
-                                disabled={
-                                    roomData.status !== 'PENDING' ||
-                                    roomData.paymentStatus !== 'PAID'
-                                }
-                            >
-                                <ShIcon
-                                    name="check-circle"
-                                    size={16}
-                                    className="mr-2"
-                                />
-                                ยืนยันการรับสินค้า
-                            </ShButton>
+                            {roomData.status === 'PENDING_PAYMENT' && roomData.buyerId && (
+                                <>
+                                    <ShippingAddressDialog
+                                        roomCode={roomData.roomCode}
+                                        mode="add"
+                                        onSuccess={() => {
+                                            fetchRoomData()
+                                        }}
+                                    />
+
+                                    <PaymentDialog
+                                        roomCode={roomData.roomCode}
+                                        totalAmount={roomData.totalCents}
+                                        onSuccess={() => {
+                                            fetchRoomData()
+                                        }}
+                                    />
+                                </>
+                            )}
 
                             <ShButton variant="outline" className="w-full">
                                 <ShIcon
@@ -484,6 +488,8 @@ export default function RoomPage() {
                             </ShButton>
                         </CardContent>
                     </Card>
+
+                    <PaymentStatusCard roomCode={roomData.roomCode} />
 
                     <Card>
                         <CardHeader>

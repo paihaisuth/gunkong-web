@@ -224,6 +224,47 @@ export default function RoomDetailsPage() {
                                         )}
                                     </div>
                                 </div>
+                                <div>
+                                    <h4 className="font-medium mb-2">
+                                        รายละเอียดห้อง
+                                    </h4>
+                                    <div className="flex justify-between">
+                                        <span className="text-muted-foreground">
+                                            สร้างเมื่อ:
+                                        </span>
+                                        <span>
+                                            {new Date(
+                                                roomData.createdAt
+                                            ).toLocaleDateString('th-TH')}
+                                        </span>
+                                    </div>
+                                    {roomData.expiresAt && (
+                                        <div className="flex justify-between">
+                                            <span className="text-muted-foreground">
+                                                หมดอายุ:
+                                            </span>
+                                            <span>
+                                                {new Date(
+                                                    roomData.expiresAt
+                                                ).toLocaleDateString('th-TH')}
+                                            </span>
+                                        </div>
+                                    )}
+                                    {roomData.buyerId && (
+                                        <div className="flex justify-between">
+                                            <span className="text-muted-foreground">
+                                                สถานะผู้ซื้อ:
+                                            </span>
+                                            <span className="text-green-600 flex items-center gap-1">
+                                                <ShIcon
+                                                    name="user-check"
+                                                    size={14}
+                                                />
+                                                มีผู้ซื้อแล้ว
+                                            </span>
+                                        </div>
+                                    )}
+                                </div>
                             </div>
                         </CardContent>
                     </Card>
@@ -420,55 +461,6 @@ export default function RoomDetailsPage() {
 
                     <Card>
                         <CardHeader>
-                            <CardTitle>ข้อมูลห้อง</CardTitle>
-                        </CardHeader>
-                        <CardContent className="space-y-2 text-sm">
-                            <div className="flex justify-between">
-                                <span className="text-muted-foreground">
-                                    รหัสห้อง:
-                                </span>
-                                <span className="font-mono">
-                                    {roomData.roomCode}
-                                </span>
-                            </div>
-                            <div className="flex justify-between">
-                                <span className="text-muted-foreground">
-                                    สร้างเมื่อ:
-                                </span>
-                                <span>
-                                    {new Date(
-                                        roomData.createdAt
-                                    ).toLocaleDateString('th-TH')}
-                                </span>
-                            </div>
-                            {roomData.expiresAt && (
-                                <div className="flex justify-between">
-                                    <span className="text-muted-foreground">
-                                        หมดอายุ:
-                                    </span>
-                                    <span>
-                                        {new Date(
-                                            roomData.expiresAt
-                                        ).toLocaleDateString('th-TH')}
-                                    </span>
-                                </div>
-                            )}
-                            {roomData.buyerId && (
-                                <div className="flex justify-between">
-                                    <span className="text-muted-foreground">
-                                        สถานะผู้ซื้อ:
-                                    </span>
-                                    <span className="text-green-600 flex items-center gap-1">
-                                        <ShIcon name="user-check" size={14} />
-                                        มีผู้ซื้อแล้ว
-                                    </span>
-                                </div>
-                            )}
-                        </CardContent>
-                    </Card>
-
-                    <Card>
-                        <CardHeader>
                             <CardTitle>การดำเนินการ</CardTitle>
                         </CardHeader>
                         <CardContent className="space-y-3">
@@ -481,14 +473,10 @@ export default function RoomDetailsPage() {
                                 แชร์ห้อง
                             </ShButton>
 
-                            {roomData.paymentStatus === 'PAID' && (
+                            {roomData.status === 'SHIPPED' && (
                                 <ShButton
                                     variant="outline"
                                     className="w-full"
-                                    disabled={
-                                        roomData.status !== 'PENDING' &&
-                                        roomData.status !== 'CONFIRMED'
-                                    }
                                 >
                                     <ShIcon
                                         name="check-circle"

@@ -5,17 +5,51 @@ import { callApi } from '@/lib/service'
 
 type ItemStatus =
     | 'CREATED'
-    | 'PENDING'
-    | 'CONFIRMED'
+    | 'PENDING_PAYMENT'
+    | 'PAID'
     | 'SHIPPED'
     | 'COMPLETED'
     | 'CANCELLED'
-type PaymentStatus = 'PENDING' | 'PAID' | 'VERIFIED' | 'FAILED'
+
+type PaymentProvider = 'OMISE' | 'PROMPTPAY' | 'BANK_TRANSFER'
+type PaymentStatus = 'PENDING' | 'HELD' | 'RELEASED' | 'REFUNDED'
 
 export interface RoomUser {
     id: string
     username: string
     fullName: string
+}
+
+export interface Payment {
+    id: string
+    roomId: string
+    provider: PaymentProvider
+    amountCents: number
+    omiseChargeId: string | null
+    status: PaymentStatus
+    slipImage: {
+        url: string
+        publicId: string
+    } | null
+    heldAt: string | null
+    releasedAt: string | null
+    refundedAt: string | null
+    createdAt: string
+    updatedAt: string
+}
+
+export interface ShippingAddress {
+    id: string
+    roomId: string
+    recipientName: string
+    phone: string
+    addressLine1: string
+    addressLine2: string | null
+    district: string
+    province: string
+    postalCode: string
+    createdAt: string
+    updatedAt: string
 }
 
 export interface Room {
@@ -62,7 +96,7 @@ export type SearchRoomShcema = z.infer<typeof searchRoomSchema>
 
 export const searchRooms = (roomCode: SearchRoomShcema): ApiResponse<Room> =>
     callApi(roomCode, searchRoomSchema, (data) => {
-        return api.get(`/room/${data.roomCode}`)
+        return api.get(`/room/code/${data.roomCode}`)
     })
 
 interface FetchRoomsParams {
@@ -115,12 +149,12 @@ export const createRoom = (payload: CreateRoomSchema): ApiResponse<Room> =>
 
 export const fetchCodeRoom = (payload: SearchRoomShcema): ApiResponse<Room> => {
     return callApi(payload, searchRoomSchema, (data) => {
-        return api.get(`/room/${data.roomCode}`)
+        return api.get(`/room/code/${data.roomCode}`)
     })
 }
 
 const updateRoomSchema = z.object({
-    roomId: z.string().min(1, 'Room ID is required'),
+    roomCode: z.string().min(1, 'Room code is required'),
     itemTitle: z.string().min(1, 'Item title is required').optional(),
     itemDescription: z.string().optional(),
     quantity: z.number().min(1, 'Quantity must be at least 1').optional(),
@@ -135,6 +169,60 @@ export type UpdateRoomSchema = z.infer<typeof updateRoomSchema>
 
 export const updateRoom = (payload: UpdateRoomSchema): ApiResponse<Room> =>
     callApi(payload, updateRoomSchema, (data) => {
-        const { roomId, ...updateData } = data
-        return api.patch(`/room/${roomId}`, updateData)
+        const { roomCode, ...updateData } = data
+        return api.patch(`/room/${roomCode}`, updateData)
+    })
+
+// Room Workflow Functions
+const joinRoomSchema = z.object({
+    roomCode: z.string().min(1, 'Room code is required'),
+})
+
+export type JoinRoomSchema = z.infer<typeof joinRoomSchema>
+
+export const joinRoom = (payload: JoinRoomSchema): ApiResponse<Room> =>
+    callApi(payload, joinRoomSchema, (data) => {
+        return api.post(`/room/${data.roomCode}/join`)
+    })
+
+const cancelRoomSchema = z.object({
+    roomCode: z.string().min(1, 'Room code is required'),
+    reason: z.string().max(1000).optional(),
+})
+
+export type CancelRoomSchema = z.infer<typeof cancelRoomSchema>
+
+export const cancelRoom = (payload: CancelRoomSchema): ApiResponse<Room> =>
+    callApi(payload, cancelRoomSchema, (data) => {
+        const { roomCode, reason } = data
+        return api.post(`/room/${roomCode}/cancel`, { reason })
+    })
+
+const markAsShippedSchema = z.object({
+    roomCode: z.string().min(1, 'Room code is required'),
+    trackingNumber: z
+        .string()
+        .min(3, 'Tracking number must be at least 3 characters')
+        .max(100, 'Tracking number cannot exceed 100 characters'),
+})
+
+export type MarkAsShippedSchema = z.infer<typeof markAsShippedSchema>
+
+export const markAsShipped = (
+    payload: MarkAsShippedSchema
+): ApiResponse<Room> =>
+    callApi(payload, markAsShippedSchema, (data) => {
+        const { roomCode, trackingNumber } = data
+        return api.post(`/room/${roomCode}/mark-shipped`, { trackingNumber })
+    })
+
+const completeRoomSchema = z.object({
+    roomCode: z.string().min(1, 'Room code is required'),
+})
+
+export type CompleteRoomSchema = z.infer<typeof completeRoomSchema>
+
+export const completeRoom = (payload: CompleteRoomSchema): ApiResponse<Room> =>
+    callApi(payload, completeRoomSchema, (data) => {
+        return api.post(`/room/${data.roomCode}/complete`)
     })
