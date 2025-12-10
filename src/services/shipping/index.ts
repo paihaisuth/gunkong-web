@@ -4,9 +4,7 @@ import { ApiResponse } from '@/types/services'
 import { callApi } from '@/lib/service'
 import { ShippingAddress } from '@/services/room'
 
-// Add Shipping Address
-const addShippingAddressSchema = z.object({
-    roomCode: z.string().min(1, 'Room code is required'),
+const shippingAddressBaseSchema = z.object({
     recipientName: z
         .string()
         .min(1, 'Recipient name is required')
@@ -35,6 +33,10 @@ const addShippingAddressSchema = z.object({
         .regex(/^\d{5}$/, 'Postal code must be exactly 5 digits'),
 })
 
+const addShippingAddressSchema = shippingAddressBaseSchema.extend({
+    roomCode: z.string().min(1, 'Room code is required'),
+})
+
 export type AddShippingAddressSchema = z.infer<typeof addShippingAddressSchema>
 
 export const addShippingAddress = (
@@ -45,35 +47,8 @@ export const addShippingAddress = (
         return api.post(`/room/${roomCode}/shipping-address`, addressData)
     })
 
-// Update Shipping Address
-const updateShippingAddressSchema = z.object({
+const updateShippingAddressSchema = shippingAddressBaseSchema.extend({
     roomCode: z.string().min(1, 'Room code is required'),
-    recipientName: z
-        .string()
-        .min(1, 'Recipient name is required')
-        .max(100, 'Recipient name cannot exceed 100 characters'),
-    phone: z
-        .string()
-        .regex(/^\+?[0-9]{9,15}$/, 'Phone number must be 9-15 digits'),
-    addressLine1: z
-        .string()
-        .min(5, 'Address line 1 must be at least 5 characters')
-        .max(200, 'Address line 1 cannot exceed 200 characters'),
-    addressLine2: z
-        .string()
-        .max(200, 'Address line 2 cannot exceed 200 characters')
-        .optional(),
-    district: z
-        .string()
-        .min(1, 'District is required')
-        .max(100, 'District cannot exceed 100 characters'),
-    province: z
-        .string()
-        .min(1, 'Province is required')
-        .max(100, 'Province cannot exceed 100 characters'),
-    postalCode: z
-        .string()
-        .regex(/^\d{5}$/, 'Postal code must be exactly 5 digits'),
 })
 
 export type UpdateShippingAddressSchema = z.infer<
