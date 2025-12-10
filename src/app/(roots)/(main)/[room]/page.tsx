@@ -19,6 +19,8 @@ import { PaymentDialog } from './components/PaymentDialog'
 import { ShippingAddressDialog } from './components/ShippingAddressDialog'
 import { RoomActions } from './components/RoomActions'
 import { PaymentStatusCard } from './components/PaymentStatusCard'
+import { useUserStore } from '@/stores/useUserStore'
+import { getUserIdFromToken } from '@/lib/token-utils'
 
 interface RoomData {
     id: string
@@ -59,11 +61,13 @@ export default function RoomPage() {
     const [roomData, setRoomData] = useState<RoomData | null>(null)
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
+    const accessToken = useUserStore((state) => state.accessToken)
 
     const roomCode = params.room as string
+    const currentUserId = accessToken ? getUserIdFromToken(accessToken) : null
 
-    const fetchRoomData = async () => {
-        if (!roomCode) {
+    const fetchRoomData = async (code: string = roomCode) => {
+        if (!code) {
             setError('ไม่พบรหัสห้อง')
             setLoading(false)
             return
@@ -72,7 +76,7 @@ export default function RoomPage() {
         try {
             setLoading(true)
             const response = await searchRooms({
-                roomCode: roomCode.toUpperCase(),
+                roomCode: code.toUpperCase(),
             })
 
             if (response.data?.data?.item) {
@@ -450,7 +454,7 @@ export default function RoomPage() {
                             <RoomActions
                                 roomCode={roomData.roomCode}
                                 roomStatus={roomData.status}
-                                currentUserId="temp-user-id"
+                                currentUserId={currentUserId || ''}
                                 sellerId={roomData.sellerId}
                                 buyerId={roomData.buyerId}
                                 onSuccess={() => {
