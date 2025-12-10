@@ -35,7 +35,18 @@ const paymentSchema = z.object({
     omiseToken: z.string().optional(),
     slipImageUrl: z.string().url('URL รูปภาพไม่ถูกต้อง').optional().or(z.literal('')),
     slipImagePublicId: z.string().optional(),
-})
+}).refine(
+    (data) => {
+        if (data.provider === 'OMISE') {
+            return typeof data.omiseToken === 'string' && data.omiseToken.trim() !== ''
+        }
+        return true
+    },
+    {
+        message: 'กรุณากรอก Omise Token',
+        path: ['omiseToken'],
+    }
+)
 
 type PaymentFormData = z.infer<typeof paymentSchema>
 
