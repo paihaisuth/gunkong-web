@@ -1,4 +1,4 @@
-export function decodeJWT(token: string): { exp?: number } | null {
+export function decodeJWT(token: string): { exp?: number; sub?: string } | null {
     try {
         const parts = token.split('.')
         if (parts.length !== 3) {
@@ -32,4 +32,12 @@ export function getTokenExpirationTime(token: string): number | null {
         return null
     }
     return decoded.exp * 1000
+}
+
+export function getUserIdFromToken(token: string): string | null {
+    const decoded = decodeJWT(token)
+    if (!decoded || !decoded.sub) {
+        return null
+    }
+    return decoded.sub
 }
