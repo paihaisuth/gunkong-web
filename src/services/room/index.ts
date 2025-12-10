@@ -92,9 +92,9 @@ const searchRoomSchema = z.object({
     roomCode: z.string().min(1).max(8),
 })
 
-export type SearchRoomShcema = z.infer<typeof searchRoomSchema>
+export type SearchRoomSchema = z.infer<typeof searchRoomSchema>
 
-export const searchRooms = (roomCode: SearchRoomShcema): ApiResponse<Room> =>
+export const searchRooms = (roomCode: SearchRoomSchema): ApiResponse<Room> =>
     callApi(roomCode, searchRoomSchema, (data) => {
         return api.get(`/room/code/${data.roomCode}`)
     })
@@ -147,7 +147,7 @@ export const createRoom = (payload: CreateRoomSchema): ApiResponse<Room> =>
         })
     })
 
-export const fetchCodeRoom = (payload: SearchRoomShcema): ApiResponse<Room> => {
+export const fetchCodeRoom = (payload: SearchRoomSchema): ApiResponse<Room> => {
     return callApi(payload, searchRoomSchema, (data) => {
         return api.get(`/room/code/${data.roomCode}`)
     })
