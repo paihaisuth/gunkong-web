@@ -120,8 +120,8 @@ export default function RoomDetailsPage() {
 
     return (
         <div className="container mx-auto p-4 space-y-6">
-            <div className="flex items-center justify-between">
-                <div className="flex items-center gap-4">
+            <div className="flex flex-col md:flex-row items-end md:items-center gap-2 justify-between">
+                <div className="flex items-center gap-4 w-full">
                     <ShButton
                         variant="ghost"
                         size="icon"
@@ -130,7 +130,7 @@ export default function RoomDetailsPage() {
                         <ShIcon name="arrow-left" size={20} />
                     </ShButton>
                     <div>
-                        <h1 className="text-2xl font-bold">
+                        <h1 className="text-xl font-bold">
                             รายละเอียดห้อง {roomData.roomCode}
                         </h1>
                         <p className="text-muted-foreground">
@@ -138,12 +138,14 @@ export default function RoomDetailsPage() {
                         </p>
                     </div>
                 </div>
-                {roomData.status === 'CREATED' && !roomData.buyerId && (
-                    <ShButton onClick={handleEdit}>
-                        <ShIcon name="edit" size={16} className="mr-2" />
-                        แก้ไขรายละเอียด
-                    </ShButton>
-                )}
+                <div>
+                    {roomData.status === 'CREATED' && !roomData.buyerId && (
+                        <ShButton onClick={handleEdit}>
+                            <ShIcon name="edit" size={16} className="mr-2" />
+                            แก้ไขรายละเอียด
+                        </ShButton>
+                    )}
+                </div>
             </div>
 
             <div className="grid lg:grid-cols-3 gap-6">
@@ -194,12 +196,6 @@ export default function RoomDetailsPage() {
                                                 {roomData.quantity} ชิ้น
                                             </span>
                                         </div>
-                                        <div className="flex justify-between">
-                                            <span className="text-muted-foreground">
-                                                สกุลเงิน:
-                                            </span>
-                                            <span>{roomData.currency}</span>
-                                        </div>
                                     </div>
                                 </div>
 
@@ -224,7 +220,7 @@ export default function RoomDetailsPage() {
                                         )}
                                     </div>
                                 </div>
-                                <div>
+                                <div className="gap-4">
                                     <h4 className="font-medium mb-2">
                                         รายละเอียดห้อง
                                     </h4>
@@ -260,7 +256,7 @@ export default function RoomDetailsPage() {
                                                     name="user-check"
                                                     size={14}
                                                 />
-                                                มีผู้ซื้อแล้ว
+                                                {roomData.buyer?.fullName}
                                             </span>
                                         </div>
                                     )}
@@ -474,10 +470,7 @@ export default function RoomDetailsPage() {
                             </ShButton>
 
                             {roomData.status === 'SHIPPED' && (
-                                <ShButton
-                                    variant="outline"
-                                    className="w-full"
-                                >
+                                <ShButton variant="outline" className="w-full">
                                     <ShIcon
                                         name="check-circle"
                                         size={16}

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { toast } from 'sonner'
-import { fetchRooms, type Room } from '@/services/room'
+import { fetchSellRooms, type Room } from '@/services/room'
 
 export function useRooms() {
     const [rooms, setRooms] = useState<Room[]>([])
@@ -13,7 +13,7 @@ export function useRooms() {
     const getRooms = async (currentPage = 1, search = '') => {
         try {
             setIsLoading(true)
-            const response = await fetchRooms({
+            const response = await fetchSellRooms({
                 page: currentPage,
                 perPage: itemsPerPage,
                 searchText: search || undefined,

@@ -105,7 +105,7 @@ interface FetchRoomsParams {
     searchText?: string
 }
 
-export const fetchRooms = async (
+export const fetchSellRooms = async (
     params?: FetchRoomsParams
 ): ApiResponse<Room[]> => {
     const queryParams = new URLSearchParams()

@@ -18,7 +18,7 @@ import {
 import { ShButton } from '@/components/ui/button'
 import { ShInput } from '@/components/ui/input'
 import { toast } from 'sonner'
-import { fetchRooms, createRoom } from '@/services/room'
+import { fetchSellRooms, createRoom } from '@/services/room'
 import { useState, useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -97,7 +97,7 @@ export default function Room() {
     const getRooms = async (page = 1, search = '') => {
         try {
             setIsLoadingRooms(true)
-            const response = await fetchRooms({
+            const response = await fetchSellRooms({
                 page,
                 perPage: itemsPerPage,
                 searchText: search || undefined,

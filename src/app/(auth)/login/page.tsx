@@ -40,7 +40,7 @@ type LoginFormValues = z.infer<typeof loginSchema>
 
 export default function LoginPage() {
     const [showPassword, setShowPassword] = useState(false)
-    const { setTokens } = useUserStore()
+    const { login: loginAction } = useUserStore()
     const router = useRouter()
     const searchParams = useSearchParams()
     const redirectTo = searchParams.get('redirectTo') || '/'
@@ -63,10 +63,8 @@ export default function LoginPage() {
                 return
             }
 
-            const accessToken = response.data.data.item.accessToken
-            const refreshToken = response.data.data.item.refreshToken
-
-            setTokens(accessToken, refreshToken)
+            const { user, accessToken, refreshToken } = response.data.data.item
+            loginAction(user, accessToken, refreshToken)
             toast('เข้าสู่ระบบสำเร็จ')
             router.push(redirectTo)
         } catch {

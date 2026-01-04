@@ -190,7 +190,8 @@ export default function RoomPage() {
                                                 : roomData.status ===
                                                   'CANCELLED'
                                                 ? 'destructive'
-                                                : roomData.status === 'PENDING'
+                                                : roomData.status ===
+                                                  'PENDING_PAYMENT'
                                                 ? 'secondary'
                                                 : 'outline'
                                         }
@@ -463,25 +464,26 @@ export default function RoomPage() {
                                 }}
                             />
 
-                            {roomData.status === 'PENDING_PAYMENT' && roomData.buyerId && (
-                                <>
-                                    <ShippingAddressDialog
-                                        roomCode={roomData.roomCode}
-                                        mode="add"
-                                        onSuccess={() => {
-                                            fetchRoomData()
-                                        }}
-                                    />
+                            {roomData.status === 'PENDING_PAYMENT' &&
+                                roomData.buyerId && (
+                                    <>
+                                        <ShippingAddressDialog
+                                            roomCode={roomData.roomCode}
+                                            mode="add"
+                                            onSuccess={() => {
+                                                fetchRoomData()
+                                            }}
+                                        />
 
-                                    <PaymentDialog
-                                        roomCode={roomData.roomCode}
-                                        totalAmount={roomData.totalCents}
-                                        onSuccess={() => {
-                                            fetchRoomData()
-                                        }}
-                                    />
-                                </>
-                            )}
+                                        <PaymentDialog
+                                            roomCode={roomData.roomCode}
+                                            totalAmount={roomData.totalCents}
+                                            onSuccess={() => {
+                                                fetchRoomData()
+                                            }}
+                                        />
+                                    </>
+                                )}
 
                             <ShButton variant="outline" className="w-full">
                                 <ShIcon

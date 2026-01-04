@@ -20,7 +20,8 @@ export function SearchResultCard({ room, onJoinRoom }: SearchResultCardProps) {
             <CardHeader>
                 <CardTitle>ผลการค้นหา</CardTitle>
                 <CardDescription>
-                    ข้อมูลห้องที่พบจากการค้นหา - เข้าร่วมห้องเพื่อดูรายละเอียดเพิ่มเติม
+                    ข้อมูลห้องที่พบจากการค้นหา -
+                    เข้าร่วมห้องเพื่อดูรายละเอียดเพิ่มเติม
                 </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -31,7 +32,8 @@ export function SearchResultCard({ room, onJoinRoom }: SearchResultCardProps) {
                                 <div className="flex items-center gap-4">
                                     <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center">
                                         <span className="text-primary font-bold text-lg">
-                                            {room.roomCode?.substring(0, 2) || 'RM'}
+                                            {room.roomCode?.substring(0, 2) ||
+                                                'RM'}
                                         </span>
                                     </div>
                                     <div>
@@ -39,7 +41,8 @@ export function SearchResultCard({ room, onJoinRoom }: SearchResultCardProps) {
                                             ห้อง {room.roomCode}
                                         </h3>
                                         <p className="text-base text-foreground font-medium">
-                                            {room.itemTitle || 'ไม่ระบุชื่อสินค้า'}
+                                            {room.itemTitle ||
+                                                'ไม่ระบุชื่อสินค้า'}
                                         </p>
                                         {room.sellerId && (
                                             <p className="text-sm text-muted-foreground">
@@ -55,7 +58,8 @@ export function SearchResultCard({ room, onJoinRoom }: SearchResultCardProps) {
                                                 ? 'default'
                                                 : room.status === 'CANCELLED'
                                                 ? 'destructive'
-                                                : room.status === 'PENDING'
+                                                : room.status ===
+                                                  'PENDING_PAYMENT'
                                                 ? 'secondary'
                                                 : 'outline'
                                         }
