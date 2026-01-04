@@ -29,7 +29,7 @@ import { submitPayment, type SubmitPaymentSchema } from '@/services/payment'
 
 const paymentSchema = z.object({
     provider: z.enum(['OMISE', 'PROMPTPAY', 'BANK_TRANSFER'], {
-        required_error: 'กรุณาเลือกช่องทางการชำระเงิน',
+        message: 'กรุณาเลือกช่องทางการชำระเงิน',
     }),
     omiseToken: z.string().optional(),
     slipImageUrl: z.string().url('URL รูปภาพไม่ถูกต้อง').optional().or(z.literal('')),

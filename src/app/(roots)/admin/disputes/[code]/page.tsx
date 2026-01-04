@@ -31,7 +31,7 @@ const resolveSchema = z.object({
   resolution: z.enum(
     ['RESOLVED_BUYER_FAVOR', 'RESOLVED_SELLER_FAVOR', 'RESOLVED_PARTIAL', 'CLOSED'],
     {
-      errorMap: () => ({ message: 'กรุณาเลือกการแก้ไข' }),
+      message: 'กรุณาเลือกการแก้ไข',
     }
   ),
   notes: z

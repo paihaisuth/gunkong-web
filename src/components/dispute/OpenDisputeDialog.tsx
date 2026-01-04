@@ -38,7 +38,7 @@ const disputeSchema = z.object({
       'OTHER',
     ],
     {
-      errorMap: () => ({ message: 'กรุณาเลือกเหตุผล' }),
+      message: 'กรุณาเลือกเหตุผล',
     }
   ),
   description: z
