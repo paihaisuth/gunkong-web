@@ -2,6 +2,8 @@ import type { z, ZodTypeAny } from 'zod'
 import type { ApiResponse } from '../types/services'
 import { ValidationDtoError } from '../types/services'
 
+export type { ApiResponse }
+
 export const callApi = <D, T extends ZodTypeAny>(
     rawData: z.input<T>,
     schema: T,

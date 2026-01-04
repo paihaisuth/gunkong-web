@@ -126,7 +126,7 @@ export default function EditRoomPage() {
             const priceInCents = Math.round(parseFloat(data.price) * 100)
 
             const payload = {
-                roomId: roomData.id,
+                roomCode: roomData.roomCode,
                 itemTitle: data.itemTitle.trim(),
                 itemDescription: data.description?.trim() || undefined,
                 quantity: parseInt(data.quantity),

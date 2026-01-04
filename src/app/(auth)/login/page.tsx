@@ -28,6 +28,7 @@ import { login } from '@/services/login/login'
 import { useUserStore } from '@/stores/useUserStore'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { ShIcon } from '@/components/ui/icon'
+import { Checkbox } from '@/components/ui/checkbox'
 
 const loginSchema = z.object({
     usernameEmail: z.string().min(1, 'Username or email is required'),
@@ -39,7 +40,7 @@ type LoginFormValues = z.infer<typeof loginSchema>
 
 export default function LoginPage() {
     const [showPassword, setShowPassword] = useState(false)
-    const { setTokens } = useUserStore()
+    const { login: loginAction } = useUserStore()
     const router = useRouter()
     const searchParams = useSearchParams()
     const redirectTo = searchParams.get('redirectTo') || '/'
@@ -57,30 +58,23 @@ export default function LoginPage() {
         try {
             const response = await login(data)
 
-            if (response.data.error) {
-                toast('Login failed: ' + response.data.error.description)
-                return
-            }
-
             if (response.data.error || !response.data.data) {
-                toast('Login failed')
+                toast('username/email หรือ password ไม่ถูกต้อง')
                 return
             }
 
-            const accessToken = response.data.data.item.accessToken
-            const refreshToken = response.data.data.item.refreshToken
-
-            setTokens(accessToken, refreshToken)
-            toast('Login successful')
+            const { user, accessToken, refreshToken } = response.data.data.item
+            loginAction(user, accessToken, refreshToken)
+            toast('เข้าสู่ระบบสำเร็จ')
             router.push(redirectTo)
         } catch {
-            toast('Login failed')
+            toast('เข้าสู่ระบบล้มเหลว กรุณาลองใหม่อีกครั้ง')
         }
     }
 
     return (
         <div className="relative overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-secondary/5 to-accent/5">
+            <div className="absolute inset-0 bg-linear-to-br from-primary/5 via-secondary/5 to-accent/5">
                 <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
                 <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/10 rounded-full blur-3xl animate-pulse"></div>
                 <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-green-500/10 rounded-full blur-3xl animate-pulse delay-1000"></div>
@@ -93,7 +87,7 @@ export default function LoginPage() {
                         <CardHeader className="text-center space-y-6 pb-8">
                             <div className="flex justify-center">
                                 <div className="relative">
-                                    <div className="w-16 h-16 bg-gradient-to-r from-primary to-green-600 rounded-2xl flex items-center justify-center shadow-lg">
+                                    <div className="w-16 h-16 bg-linear-to-r from-primary to-green-600 rounded-2xl flex items-center justify-center shadow-lg">
                                         <ShIcon
                                             name="shield-check"
                                             className="h-8 w-8 text-white"
@@ -108,7 +102,7 @@ export default function LoginPage() {
                                 </div>
                             </div>
                             <div className="space-y-2">
-                                <CardTitle className="text-3xl font-bold bg-gradient-to-r from-primary to-green-600 bg-clip-text text-transparent">
+                                <CardTitle className="text-3xl font-bold bg-linear-to-r from-primary to-green-600 bg-clip-text text-transparent">
                                     ยินดีต้อนรับกลับ
                                 </CardTitle>
                                 <CardDescription className="text-base text-muted-foreground">
@@ -195,8 +189,8 @@ export default function LoginPage() {
                                                             leftIcon="lock"
                                                             rightIcon={
                                                                 showPassword
-                                                                    ? 'eye-off'
-                                                                    : 'eye'
+                                                                    ? 'eye'
+                                                                    : 'eye-off'
                                                             }
                                                             placeholder="กรุณากรอกรหัสผ่านของคุณ"
                                                             className="pl-10 pr-10 h-12 border-2 focus:border-primary transition-all duration-200 rounded-xl"
@@ -219,17 +213,15 @@ export default function LoginPage() {
                                             control={form.control}
                                             name="rememberMe"
                                             render={({ field }) => (
-                                                <FormItem className="flex items-center space-x-2">
+                                                <FormItem className="flex items-center">
                                                     <FormControl>
-                                                        <input
-                                                            type="checkbox"
+                                                        <Checkbox
                                                             checked={
                                                                 field.value
                                                             }
-                                                            onChange={
+                                                            onCheckedChange={
                                                                 field.onChange
                                                             }
-                                                            className="rounded border-border w-4 h-4 text-primary focus:ring-primary focus:ring-offset-0"
                                                         />
                                                     </FormControl>
                                                     <FormLabel className="text-sm font-normal cursor-pointer text-muted-foreground hover:text-foreground transition-colors">
@@ -249,7 +241,7 @@ export default function LoginPage() {
 
                                     <ShButton
                                         type="submit"
-                                        className="w-full h-12 bg-gradient-to-r from-primary to-green-600 hover:from-primary/90 hover:to-green-600/90 text-white font-medium rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-[1.02]"
+                                        className="w-full h-12 bg-linear-to-r from-primary to-green-600 hover:from-primary/90 hover:to-green-600/90 text-white font-medium rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-[1.02]"
                                         disabled={form.formState.isSubmitting}
                                     >
                                         {form.formState.isSubmitting ? (
