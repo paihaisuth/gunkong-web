@@ -96,6 +96,7 @@ export default function RoomPage() {
 
     useEffect(() => {
         fetchRoomData()
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [roomCode])
 
     const handleBackToSearch = () => {

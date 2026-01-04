@@ -24,7 +24,6 @@ import {
     FormDescription,
 } from '@/components/ui/form'
 import { ShIcon } from '@/components/ui/icon'
-import { ShBadge } from '@/components/ui/badge'
 import { toast } from 'sonner'
 import { submitPayment, type SubmitPaymentSchema } from '@/services/payment'
 
@@ -114,7 +113,12 @@ export function PaymentDialog({
         }
     }
 
-    const providerOptions = [
+    const providerOptions: Array<{
+        value: string
+        label: string
+        icon: string
+        description: string
+    }> = [
         {
             value: 'BANK_TRANSFER',
             label: 'โอนเงินผ่านธนาคาร',
@@ -217,7 +221,7 @@ export function PaymentDialog({
                                                         <div className="flex-1">
                                                             <div className="flex items-center gap-2">
                                                                 <ShIcon
-                                                                    name={option.icon as any}
+                                                                    name={option.icon}
                                                                     size={20}
                                                                 />
                                                                 <span className="font-medium">

@@ -10,41 +10,49 @@ import {
 } from '@/components/ui/card'
 import { ShBadge } from '@/components/ui/badge'
 import { ShIcon } from '@/components/ui/icon'
-import { getPayment, type GetPaymentSchema } from '@/services/payment'
+import { getPayment } from '@/services/payment'
 import { Payment } from '@/services/room'
 
 interface PaymentStatusCardProps {
     roomCode: string
 }
 
-const paymentStatusConfig = {
+type PaymentStatusIconName = 'clock' | 'shield' | 'check-circle' | 'arrow-left-circle'
+
+const paymentStatusConfig: Record<string, {
+    label: string
+    icon: PaymentStatusIconName
+    color: string
+    bgColor: string
+    variant: 'secondary' | 'default' | 'outline'
+}> = {
     PENDING: {
         label: 'รอตรวจสอบ',
         icon: 'clock',
         color: 'text-yellow-600',
         bgColor: 'bg-yellow-100',
-        variant: 'secondary' as const,
+        variant: 'secondary',
     },
     HELD: {
         label: 'พักเงินแล้ว',
         icon: 'shield',
         color: 'text-blue-600',
         bgColor: 'bg-blue-100',
-        variant: 'default' as const,
+        variant: 'default',
     },
     RELEASED: {
         label: 'จ่ายให้ผู้ขายแล้ว',
         icon: 'check-circle',
         color: 'text-green-600',
         bgColor: 'bg-green-100',
-        variant: 'default' as const,
+        variant: 'default',
     },
     REFUNDED: {
         label: 'คืนเงินแล้ว',
         icon: 'arrow-left-circle',
         color: 'text-purple-600',
         bgColor: 'bg-purple-100',
-        variant: 'outline' as const,
+        variant: 'outline',
     },
 }
 
@@ -164,6 +172,7 @@ export function PaymentStatusCard({ roomCode }: PaymentStatusCardProps) {
                                 rel="noopener noreferrer"
                                 className="block w-full rounded-lg border overflow-hidden hover:border-primary transition-colors"
                             >
+                                {/* eslint-disable-next-line @next/next/no-img-element */}
                                 <img
                                     src={payment.slipImage.url}
                                     alt="Payment Slip"
@@ -180,7 +189,7 @@ export function PaymentStatusCard({ roomCode }: PaymentStatusCardProps) {
                 <div className={`rounded-lg p-3 ${statusConfig.bgColor}`}>
                     <div className="flex items-start gap-3">
                         <div className={`mt-0.5 ${statusConfig.color}`}>
-                            <ShIcon name={statusConfig.icon as any} size={20} />
+                            <ShIcon name={statusConfig.icon} size={20} />
                         </div>
                         <div className="flex-1">
                             <p className={`font-medium text-sm ${statusConfig.color}`}>

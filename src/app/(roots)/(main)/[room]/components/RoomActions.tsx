@@ -49,7 +49,6 @@ export function RoomActions({
     onSuccess,
 }: RoomActionsProps) {
     const [isJoining, setIsJoining] = useState(false)
-    const [isCancelling, setIsCancelling] = useState(false)
     const [isCompleting, setIsCompleting] = useState(false)
 
     const isSeller = currentUserId === sellerId
