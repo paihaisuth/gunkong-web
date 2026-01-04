@@ -13,7 +13,7 @@ let failedQueue: Array<{
 let csrfToken: string | null = null
 let isCsrfInitializing = false
 let csrfQueue: Array<{
-    resolve: (value?: unknown) => void
+    resolve: (value: string | null | PromiseLike<string | null>) => void
     reject: (reason?: unknown) => void
 }> = []
 

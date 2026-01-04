@@ -28,10 +28,7 @@ interface DisputeChatProps {
 
 const messageSchema = z.object({
   content: z.string().min(1).max(2000),
-  evidenceUrls: z
-    .array(z.string().url())
-    .optional()
-    .default([]),
+  evidenceUrls: z.array(z.string().url()).optional(),
 })
 
 type MessageFormData = z.infer<typeof messageSchema>
