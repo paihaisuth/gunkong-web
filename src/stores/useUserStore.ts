@@ -1,8 +1,10 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import { setAuthCookies, removeAuthCookies } from '@/lib/auth-cookies'
+import { clearCsrfToken } from '@/plugin/axios'
 
 interface User {
+    id?: string
     email: string
     fullName: string
     phone: string
@@ -70,6 +72,7 @@ export const useUserStore = create<UserStore>()(
                     isLoading: false,
                 })
                 removeAuthCookies()
+                clearCsrfToken()
             },
 
             clearUser: () => {

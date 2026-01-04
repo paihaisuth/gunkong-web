@@ -7,11 +7,11 @@ import { ShButton } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { ShInput } from '@/components/ui/input'
 import { ShBadge } from '@/components/ui/badge'
-import { setOtpSessionCookie } from '@/lib/auth-cookies'
+// TODO: OTP functionality temporarily disabled - waiting for team budget approval
+// import { setOtpSessionCookie } from '@/lib/auth-cookies'
 import {
     Form,
     FormControl,
-    FormDescription,
     FormField,
     FormItem,
     FormLabel,
@@ -23,17 +23,13 @@ import { ShIcon } from '@/components/ui/icon'
 import { register, registerSchema } from '@/services/login/register'
 import { toast } from 'sonner'
 import { useRouter } from 'next/navigation'
+import { Checkbox } from '@/components/ui/checkbox'
 
 const formSchema = registerSchema
     .extend({
         confirmPassword: z.string(),
-        agreeToTerms: z
-            .boolean()
-            .refine(
-                (val) => val === true,
-                'You must agree to the terms and conditions'
-            ),
-        agreeToMarketing: z.boolean().optional(),
+        agreeToTerms: z.optional(z.boolean()),
+        agreeToMarketing: z.optional(z.boolean()),
     })
     .refine((data) => data.password === data.confirmPassword, {
         message: "Passwords don't match",
@@ -79,12 +75,16 @@ export default function RegisterPage() {
                 return
             }
 
-            setOtpSessionCookie(data.email)
-            toast.success(
-                response.data.data?.item?.message ||
-                    'ลงทะเบียนสำเร็จ! กรุณายืนยัน OTP ที่ส่งไปยังอีเมลของคุณ'
-            )
-            router.push(`/verify-otp?email=${encodeURIComponent(data.email)}`)
+            // TODO: OTP verification temporarily disabled - redirect to login instead
+            // setOtpSessionCookie(data.email)
+            // toast.success(
+            //     response.data.data?.item?.message ||
+            //         'ลงทะเบียนสำเร็จ! กรุณายืนยัน OTP ที่ส่งไปยังอีเมลของคุณ'
+            // )
+            // router.push(`/verify-otp?email=${encodeURIComponent(data.email)}`)
+
+            toast.success('ลงทะเบียนสำเร็จ! กรุณาเข้าสู่ระบบ')
+            router.push('/login')
         } catch (error) {
             console.error('Registration error:', error)
             toast.error('การลงทะเบียนล้มเหลว กรุณาลองใหม่อีกครั้ง')
@@ -208,10 +208,6 @@ export default function RegisterPage() {
                                                         />
                                                     </div>
                                                 </FormControl>
-                                                <FormDescription className="text-xs text-muted-foreground">
-                                                    เราจะใช้อีเมลนี้สำหรับการยืนยันและข้อมูลสำคัญ
-                                                </FormDescription>
-                                                <FormMessage />
                                             </FormItem>
                                         )}
                                     />
@@ -232,10 +228,6 @@ export default function RegisterPage() {
                                                         />
                                                     </div>
                                                 </FormControl>
-                                                <FormDescription className="text-xs text-muted-foreground">
-                                                    ชื่อผู้ใช้ที่ไม่ซ้ำกันสำหรับบัญชีของคุณ
-                                                </FormDescription>
-                                                <FormMessage />
                                             </FormItem>
                                         )}
                                     />
@@ -258,10 +250,6 @@ export default function RegisterPage() {
                                                         />
                                                     </div>
                                                 </FormControl>
-                                                <FormDescription className="text-xs text-muted-foreground">
-                                                    สำหรับการแจ้งเตือนการเทรดและติดต่อฉุกเฉิน
-                                                </FormDescription>
-                                                <FormMessage />
                                             </FormItem>
                                         )}
                                     />
@@ -284,8 +272,8 @@ export default function RegisterPage() {
                                                                 }
                                                                 rightIcon={
                                                                     showPassword
-                                                                        ? 'eye-off'
-                                                                        : 'eye'
+                                                                        ? 'eye'
+                                                                        : 'eye-off'
                                                                 }
                                                                 onRightIconClick={() =>
                                                                     setShowPassword(
@@ -298,7 +286,6 @@ export default function RegisterPage() {
                                                             />
                                                         </div>
                                                     </FormControl>
-                                                    <FormMessage />
                                                 </FormItem>
                                             )}
                                         />
@@ -320,8 +307,8 @@ export default function RegisterPage() {
                                                                 }
                                                                 rightIcon={
                                                                     showConfirmPassword
-                                                                        ? 'eye-off'
-                                                                        : 'eye'
+                                                                        ? 'eye'
+                                                                        : 'eye-off'
                                                                 }
                                                                 onRightIconClick={() =>
                                                                     setShowConfirmPassword(
@@ -334,7 +321,6 @@ export default function RegisterPage() {
                                                             />
                                                         </div>
                                                     </FormControl>
-                                                    <FormMessage />
                                                 </FormItem>
                                             )}
                                         />
@@ -364,17 +350,16 @@ export default function RegisterPage() {
                                             control={form.control}
                                             name="agreeToTerms"
                                             render={({ field }) => (
-                                                <FormItem className="flex items-start space-x-3">
+                                                <FormItem className="flex items-start">
                                                     <FormControl>
-                                                        <input
-                                                            type="checkbox"
+                                                        <Checkbox
                                                             checked={
                                                                 field.value
                                                             }
-                                                            onChange={
+                                                            onCheckedChange={
                                                                 field.onChange
                                                             }
-                                                            className="rounded border-border mt-1 w-4 h-4 text-primary focus:ring-primary focus:ring-offset-0"
+                                                            className="mt-1"
                                                         />
                                                     </FormControl>
                                                     <div className="space-y-1">
@@ -399,38 +384,15 @@ export default function RegisterPage() {
                                                 </FormItem>
                                             )}
                                         />
-
-                                        {/* <FormField
-                                            control={form.control}
-                                            name="agreeToMarketing"
-                                            render={({ field }) => (
-                                                <FormItem className="flex items-start space-x-3">
-                                                    <FormControl>
-                                                        <input
-                                                            type="checkbox"
-                                                            checked={
-                                                                field.value
-                                                            }
-                                                            onChange={
-                                                                field.onChange
-                                                            }
-                                                            className="rounded border-border mt-1 w-4 h-4 text-primary focus:ring-primary focus:ring-offset-0"
-                                                        />
-                                                    </FormControl>
-                                                    <FormLabel className="text-sm font-normal cursor-pointer text-muted-foreground hover:text-foreground transition-colors">
-                                                        ฉันต้องการรับข้อมูลการตลาด
-                                                        เกี่ยวกับผลิตภัณฑ์
-                                                        ข้อเสนอ และโปรโมชั่น
-                                                    </FormLabel>
-                                                </FormItem>
-                                            )}
-                                        /> */}
                                     </div>
 
                                     <ShButton
                                         type="submit"
                                         className="w-full h-12 bg-gradient-to-r from-primary to-green-600 hover:from-primary/90 hover:to-green-600/90 text-white font-medium rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-[1.02]"
-                                        disabled={form.formState.isSubmitting}
+                                        disabled={
+                                            form.formState.isSubmitting ||
+                                            !form.watch('agreeToTerms')
+                                        }
                                     >
                                         {form.formState.isSubmitting ? (
                                             <div className="flex items-center gap-2">
