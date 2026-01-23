@@ -20,6 +20,8 @@ import { useRouter } from 'next/navigation'
 import { fetchUserProfile } from '@/services/profile/profile'
 import { toast } from 'sonner'
 import { isTokenExpired } from '@/lib/token-utils'
+import { useNotifications } from '@/hooks/useNotifications'
+import { getNotificationIconConfig, getRelativeTime } from '@/lib/notification-utils'
 
 interface LayoutProps {
     children: React.ReactNode
@@ -54,6 +56,11 @@ const navigationConfig: NavigationItem[] = [
         icon: 'history',
         label: 'ประวัติ',
         href: '/history',
+    },
+    {
+        icon: 'alert-circle',
+        label: 'ข้อพิพาท',
+        href: '/disputes',
     },
 ]
 
@@ -250,6 +257,7 @@ function BottomNav() {
 function TopNavigation() {
     const pathname = usePathname()
     const router = useRouter()
+    const { notifications, unreadCount, handleMarkAsRead, handleMarkAllAsRead } = useNotifications()
 
     const generateBreadcrumbs = () => {
         const segments = pathname.split('/').filter(Boolean)
@@ -277,6 +285,16 @@ function TopNavigation() {
     const handleLogout = () => {
         logout()
         router.push('/login')
+    }
+
+    const handleNotificationClick = async (notification: typeof notifications[0]) => {
+        if (!notification.isRead) {
+            await handleMarkAsRead(notification.id)
+        }
+
+        if (notification.roomCode) {
+            router.push(`/rooms/${notification.roomCode}`)
+        }
     }
 
     return (
@@ -329,9 +347,11 @@ function TopNavigation() {
                                 className="relative"
                             >
                                 <ShIcon name="bell" size={20} />
-                                <span className="absolute -top-1 -right-1 w-3 h-3 bg-destructive rounded-full text-[10px] text-destructive-foreground flex items-center justify-center">
-                                    3
-                                </span>
+                                {unreadCount > 0 && (
+                                    <span className="absolute -top-1 -right-1 w-5 h-5 bg-destructive rounded-full text-[10px] text-destructive-foreground flex items-center justify-center font-semibold">
+                                        {unreadCount > 9 ? '9+' : unreadCount}
+                                    </span>
+                                )}
                                 <span className="sr-only">การแจ้งเตือน</span>
                             </ShButton>
                         </DropdownMenuTrigger>
@@ -340,63 +360,47 @@ function TopNavigation() {
                                 <h4 className="font-medium">การแจ้งเตือน</h4>
                             </div>
                             <div className="max-h-64 overflow-y-auto">
-                                <DropdownMenuItem className="flex flex-col items-start py-3">
-                                    <div className="flex items-center gap-2 w-full">
-                                        <ShIcon
-                                            name="check-circle"
-                                            size={16}
-                                            className="text-green-500"
-                                        />
-                                        <span className="font-medium text-sm">
-                                            การเทรดสำเร็จ
-                                        </span>
-                                        <span className="text-xs text-muted-foreground ml-auto">
-                                            2 นาทีที่แล้ว
-                                        </span>
+                                {notifications.length === 0 ? (
+                                    <div className="px-3 py-8 text-center text-sm text-muted-foreground">
+                                        ไม่มีการแจ้งเตือน
                                     </div>
-                                    <p className="text-xs text-muted-foreground mt-1">
-                                        ขาย USDT 1,000 เรียบร้อยแล้ว
-                                    </p>
-                                </DropdownMenuItem>
-                                <DropdownMenuItem className="flex flex-col items-start py-3">
-                                    <div className="flex items-center gap-2 w-full">
-                                        <ShIcon
-                                            name="message-circle"
-                                            size={16}
-                                            className="text-blue-500"
-                                        />
-                                        <span className="font-medium text-sm">
-                                            ข้อความใหม่
-                                        </span>
-                                        <span className="text-xs text-muted-foreground ml-auto">
-                                            5 นาทีที่แล้ว
-                                        </span>
-                                    </div>
-                                    <p className="text-xs text-muted-foreground mt-1">
-                                        ผู้ซื้อส่งหลักฐานการโอนเงินแล้ว
-                                    </p>
-                                </DropdownMenuItem>
-                                <DropdownMenuItem className="flex flex-col items-start py-3">
-                                    <div className="flex items-center gap-2 w-full">
-                                        <ShIcon
-                                            name="alert-triangle"
-                                            size={16}
-                                            className="text-yellow-500"
-                                        />
-                                        <span className="font-medium text-sm">
-                                            ออเดอร์ใกล้หมดเวลา
-                                        </span>
-                                        <span className="text-xs text-muted-foreground ml-auto">
-                                            10 นาทีที่แล้ว
-                                        </span>
-                                    </div>
-                                    <p className="text-xs text-muted-foreground mt-1">
-                                        ออเดอร์ #12345 เหลือเวลา 5 นาที
-                                    </p>
-                                </DropdownMenuItem>
+                                ) : (
+                                    notifications.map((notification) => {
+                                        const { icon, color } = getNotificationIconConfig(notification.type)
+                                        return (
+                                            <DropdownMenuItem
+                                                key={notification.id}
+                                                onClick={() => handleNotificationClick(notification)}
+                                                className="flex flex-col items-start py-3 cursor-pointer"
+                                            >
+                                                <div className="flex items-center gap-2 w-full">
+                                                    <ShIcon
+                                                        name={icon}
+                                                        size={16}
+                                                        className={color}
+                                                    />
+                                                    <span className="font-medium text-sm flex-1">
+                                                        {notification.title}
+                                                    </span>
+                                                    <span className="text-xs text-muted-foreground ml-auto">
+                                                        {getRelativeTime(notification.createdAt)}
+                                                    </span>
+                                                </div>
+                                                <p className="text-xs text-muted-foreground mt-1">
+                                                    {notification.message}
+                                                </p>
+                                            </DropdownMenuItem>
+                                        )
+                                    })
+                                )}
                             </div>
                             <DropdownMenuSeparator />
-                            <DropdownMenuItem className="text-center text-sm text-muted-foreground">
+                            <DropdownMenuItem
+                                onClick={async () => {
+                                    await handleMarkAllAsRead()
+                                }}
+                                className="text-center text-sm text-muted-foreground"
+                            >
                                 ดูการแจ้งเตือนทั้งหมด
                             </DropdownMenuItem>
                         </DropdownMenuContent>
