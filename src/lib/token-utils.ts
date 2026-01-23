@@ -1,4 +1,4 @@
-export function decodeJWT(token: string): { exp?: number; sub?: string } | null {
+export function decodeJWT(token: string): { exp?: number; sub?: string; userId?: string } | null {
     try {
         const parts = token.split('.')
         if (parts.length !== 3) {
@@ -36,8 +36,9 @@ export function getTokenExpirationTime(token: string): number | null {
 
 export function getUserIdFromToken(token: string): string | null {
     const decoded = decodeJWT(token)
-    if (!decoded || !decoded.sub) {
+    if (!decoded) {
         return null
     }
-    return decoded.sub
+    // Support both 'userId' (current backend) and 'sub' (standard JWT)
+    return decoded.userId || decoded.sub || null
 }
