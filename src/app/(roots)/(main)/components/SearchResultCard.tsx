@@ -15,6 +15,25 @@ interface SearchResultCardProps {
 }
 
 export function SearchResultCard({ room, onJoinRoom }: SearchResultCardProps) {
+    const getStatusText = (status: string) => {
+        switch (status) {
+            case 'CREATED':
+                return 'สร้างห้องแล้ว'
+            case 'PENDING_PAYMENT':
+                return 'รอชำระเงิน'
+            case 'PAID':
+                return 'ชำระเงินแล้ว'
+            case 'SHIPPED':
+                return 'จัดส่งสินค้าแล้ว'
+            case 'COMPLETED':
+                return 'ทำรายการเสร็จสมบูรณ์'
+            case 'CANCELLED':
+                return 'ยกเลิกห้อง'
+            default:
+                return 'สถานะไม่ทราบ'
+        }
+    }
+
     return (
         <Card>
             <CardHeader>
@@ -57,17 +76,17 @@ export function SearchResultCard({ room, onJoinRoom }: SearchResultCardProps) {
                                             room.status === 'COMPLETED'
                                                 ? 'default'
                                                 : room.status === 'CANCELLED'
-                                                ? 'destructive'
-                                                : room.status ===
-                                                  'PENDING_PAYMENT'
-                                                ? 'secondary'
-                                                : 'outline'
+                                                  ? 'destructive'
+                                                  : room.status ===
+                                                      'PENDING_PAYMENT'
+                                                    ? 'secondary'
+                                                    : 'outline'
                                         }
                                     >
-                                        {room.status}
+                                        {getStatusText(room.status)}
                                     </ShBadge>
                                     <ShButton onClick={onJoinRoom} size="lg">
-                                        เข้าร่วมห้อง
+                                        ดูข้อมูลห้อง
                                     </ShButton>
                                 </div>
                             </div>
