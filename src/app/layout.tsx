@@ -4,7 +4,6 @@ import './globals.css'
 import { ThemeProvider } from '@/components/provider/theme-provider'
 import { Toaster } from '@/components/ui/sonner'
 import { AuthProvider } from '@/components/provider/auth-provider'
-import { CsrfProvider } from '@/components/provider/csrf-provider'
 
 const geistSans = Geist({
     variable: '--font-geist-sans',
@@ -55,12 +54,10 @@ export default function RootLayout({
                     enableSystem
                     disableTransitionOnChange
                 >
-                    <CsrfProvider>
-                        <AuthProvider>
-                            {children}
-                            <Toaster />
-                        </AuthProvider>
-                    </CsrfProvider>
+                    <AuthProvider>
+                        {children}
+                        <Toaster />
+                    </AuthProvider>
                 </ThemeProvider>
             </body>
         </html>

@@ -188,12 +188,12 @@ export default function RoomPage() {
                                             roomData.status === 'COMPLETED'
                                                 ? 'default'
                                                 : roomData.status ===
-                                                  'CANCELLED'
-                                                ? 'destructive'
-                                                : roomData.status ===
-                                                  'PENDING_PAYMENT'
-                                                ? 'secondary'
-                                                : 'outline'
+                                                    'CANCELLED'
+                                                  ? 'destructive'
+                                                  : roomData.status ===
+                                                      'PENDING_PAYMENT'
+                                                    ? 'secondary'
+                                                    : 'outline'
                                         }
                                     >
                                         {roomData.status}
@@ -203,12 +203,12 @@ export default function RoomPage() {
                                             roomData.paymentStatus === 'PAID'
                                                 ? 'default'
                                                 : roomData.paymentStatus ===
-                                                  'VERIFIED'
-                                                ? 'default'
-                                                : roomData.paymentStatus ===
-                                                  'FAILED'
-                                                ? 'destructive'
-                                                : 'secondary'
+                                                    'VERIFIED'
+                                                  ? 'default'
+                                                  : roomData.paymentStatus ===
+                                                      'FAILED'
+                                                    ? 'destructive'
+                                                    : 'secondary'
                                         }
                                     >
                                         {roomData.paymentStatus}
@@ -326,7 +326,7 @@ export default function RoomPage() {
                                         <p className="font-medium">สร้างห้อง</p>
                                         <p className="text-sm text-muted-foreground">
                                             {new Date(
-                                                roomData.createdAt
+                                                roomData.createdAt,
                                             ).toLocaleString('th-TH')}
                                         </p>
                                     </div>
@@ -347,7 +347,7 @@ export default function RoomPage() {
                                             </p>
                                             <p className="text-sm text-muted-foreground">
                                                 {new Date(
-                                                    roomData.paidAt
+                                                    roomData.paidAt,
                                                 ).toLocaleString('th-TH')}
                                             </p>
                                         </div>
@@ -369,7 +369,7 @@ export default function RoomPage() {
                                             </p>
                                             <p className="text-sm text-muted-foreground">
                                                 {new Date(
-                                                    roomData.shippedAt
+                                                    roomData.shippedAt,
                                                 ).toLocaleString('th-TH')}
                                             </p>
                                         </div>
@@ -391,7 +391,7 @@ export default function RoomPage() {
                                             </p>
                                             <p className="text-sm text-muted-foreground">
                                                 {new Date(
-                                                    roomData.completedAt
+                                                    roomData.completedAt,
                                                 ).toLocaleString('th-TH')}
                                             </p>
                                         </div>
@@ -517,7 +517,7 @@ export default function RoomPage() {
                                 </span>
                                 <span>
                                     {new Date(
-                                        roomData.createdAt
+                                        roomData.createdAt,
                                     ).toLocaleDateString('th-TH')}
                                 </span>
                             </div>
@@ -528,7 +528,7 @@ export default function RoomPage() {
                                     </span>
                                     <span>
                                         {new Date(
-                                            roomData.expiresAt
+                                            roomData.expiresAt,
                                         ).toLocaleDateString('th-TH')}
                                     </span>
                                 </div>

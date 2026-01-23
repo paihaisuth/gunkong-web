@@ -17,15 +17,22 @@ interface PaymentStatusCardProps {
     roomCode: string
 }
 
-type PaymentStatusIconName = 'clock' | 'shield' | 'check-circle' | 'arrow-left-circle'
+type PaymentStatusIconName =
+    | 'clock'
+    | 'shield'
+    | 'check-circle'
+    | 'arrow-left-circle'
 
-const paymentStatusConfig: Record<string, {
-    label: string
-    icon: PaymentStatusIconName
-    color: string
-    bgColor: string
-    variant: 'secondary' | 'default' | 'outline'
-}> = {
+const paymentStatusConfig: Record<
+    string,
+    {
+        label: string
+        icon: PaymentStatusIconName
+        color: string
+        bgColor: string
+        variant: 'secondary' | 'default' | 'outline'
+    }
+> = {
     PENDING: {
         label: 'รอตรวจสอบ',
         icon: 'clock',
@@ -66,11 +73,14 @@ export function PaymentStatusCard({ roomCode }: PaymentStatusCardProps) {
     const [payment, setPayment] = useState<Payment | null>(null)
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
+    const [isFirstLoad, setIsFirstLoad] = useState(true)
 
     useEffect(() => {
+        if (!isFirstLoad) return
         const fetchPayment = async () => {
             try {
                 setLoading(true)
+                setIsFirstLoad(false)
                 const response = await getPayment({ roomCode })
                 if (response.data?.data?.item) {
                     setPayment(response.data.data.item)
@@ -109,7 +119,11 @@ export function PaymentStatusCard({ roomCode }: PaymentStatusCardProps) {
                 </CardHeader>
                 <CardContent>
                     <div className="text-center py-8 text-muted-foreground">
-                        <ShIcon name="alert-circle" size={24} className="mx-auto mb-2" />
+                        <ShIcon
+                            name="alert-circle"
+                            size={24}
+                            className="mx-auto mb-2"
+                        />
                         <p className="text-sm">
                             {error || 'ยังไม่มีการชำระเงิน'}
                         </p>
@@ -137,7 +151,9 @@ export function PaymentStatusCard({ roomCode }: PaymentStatusCardProps) {
             <CardContent className="space-y-4">
                 <div className="space-y-3">
                     <div className="flex justify-between text-sm">
-                        <span className="text-muted-foreground">จำนวนเงิน:</span>
+                        <span className="text-muted-foreground">
+                            จำนวนเงิน:
+                        </span>
                         <span className="font-semibold">
                             ฿{(payment.amountCents / 100).toLocaleString()}
                         </span>
@@ -178,7 +194,8 @@ export function PaymentStatusCard({ roomCode }: PaymentStatusCardProps) {
                                     alt="Payment Slip"
                                     className="w-full h-auto"
                                     onError={(e) => {
-                                        e.currentTarget.src = '/placeholder-slip.png'
+                                        e.currentTarget.src =
+                                            '/placeholder-slip.png'
                                     }}
                                 />
                             </a>
@@ -192,7 +209,9 @@ export function PaymentStatusCard({ roomCode }: PaymentStatusCardProps) {
                             <ShIcon name={statusConfig.icon} size={20} />
                         </div>
                         <div className="flex-1">
-                            <p className={`font-medium text-sm ${statusConfig.color}`}>
+                            <p
+                                className={`font-medium text-sm ${statusConfig.color}`}
+                            >
                                 {statusConfig.label}
                             </p>
                             <p className="text-xs text-muted-foreground mt-1">
@@ -201,25 +220,29 @@ export function PaymentStatusCard({ roomCode }: PaymentStatusCardProps) {
                             {payment.heldAt && payment.status === 'HELD' && (
                                 <p className="text-xs text-muted-foreground mt-1">
                                     เมื่อ{' '}
-                                    {new Date(payment.heldAt).toLocaleString('th-TH')}
-                                </p>
-                            )}
-                            {payment.releasedAt && payment.status === 'RELEASED' && (
-                                <p className="text-xs text-muted-foreground mt-1">
-                                    เมื่อ{' '}
-                                    {new Date(payment.releasedAt).toLocaleString(
-                                        'th-TH'
+                                    {new Date(payment.heldAt).toLocaleString(
+                                        'th-TH',
                                     )}
                                 </p>
                             )}
-                            {payment.refundedAt && payment.status === 'REFUNDED' && (
-                                <p className="text-xs text-muted-foreground mt-1">
-                                    เมื่อ{' '}
-                                    {new Date(payment.refundedAt).toLocaleString(
-                                        'th-TH'
-                                    )}
-                                </p>
-                            )}
+                            {payment.releasedAt &&
+                                payment.status === 'RELEASED' && (
+                                    <p className="text-xs text-muted-foreground mt-1">
+                                        เมื่อ{' '}
+                                        {new Date(
+                                            payment.releasedAt,
+                                        ).toLocaleString('th-TH')}
+                                    </p>
+                                )}
+                            {payment.refundedAt &&
+                                payment.status === 'REFUNDED' && (
+                                    <p className="text-xs text-muted-foreground mt-1">
+                                        เมื่อ{' '}
+                                        {new Date(
+                                            payment.refundedAt,
+                                        ).toLocaleString('th-TH')}
+                                    </p>
+                                )}
                         </div>
                     </div>
                 </div>

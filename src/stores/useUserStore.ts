@@ -9,6 +9,7 @@ interface User {
     fullName: string
     phone: string
     username: string
+    role?: 'USER' | 'ADMIN'
 }
 
 interface UserState {

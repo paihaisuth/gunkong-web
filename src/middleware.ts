@@ -27,6 +27,13 @@ export function middleware(request: NextRequest) {
         return NextResponse.next()
     }
 
+    if (pathname.startsWith('/admin')) {
+        if (!accessToken) {
+            return NextResponse.redirect(new URL('/login', request.url))
+        }
+        return NextResponse.next()
+    }
+
     if (!isPublicRoute && !accessToken) {
         const loginUrl = new URL('/login', request.url)
         if (pathname !== '/') {

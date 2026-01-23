@@ -71,7 +71,7 @@ export const initializeCsrfToken = async (): Promise<string | null> => {
         const response = await axios.get(
             `${
                 process.env.NEXT_PUBLIC_API_BASE_URL ||
-                'http://localhost:8000/api'
+                'http://localhost:8800/api'
             }/csrf-token`,
             { withCredentials: true }
         )
@@ -89,7 +89,7 @@ export const initializeCsrfToken = async (): Promise<string | null> => {
 
 const createAxiosInstance = () => {
     const apiBaseUrl =
-        process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3000/api'
+        process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8800/api'
 
     const instance = axios.create({
         baseURL: apiBaseUrl,
@@ -127,10 +127,29 @@ const createAxiosInstance = () => {
                 }
             }
 
+            // Add CSRF token for state-changing requests (only for authenticated users)
             const method = config.method?.toLowerCase()
             if (['post', 'put', 'patch', 'delete'].includes(method || '')) {
-                if (csrfToken) {
-                    config.headers['X-CSRF-Token'] = csrfToken
+                // Skip CSRF for auth endpoints (login, register, etc.)
+                const authEndpoints = ['/login', '/register', '/refresh-token', '/google']
+                const isAuthEndpoint = authEndpoints.some(endpoint =>
+                    config.url?.includes(endpoint)
+                )
+
+                // Only add CSRF token for non-auth endpoints when user is authenticated
+                if (!isAuthEndpoint && token) {
+                    // Fetch CSRF token on-demand if not available
+                    if (!csrfToken) {
+                        try {
+                            await initializeCsrfToken()
+                        } catch (error) {
+                            console.warn('Failed to fetch CSRF token:', error)
+                        }
+                    }
+
+                    if (csrfToken) {
+                        config.headers['X-CSRF-Token'] = csrfToken
+                    }
                 }
             }
 
