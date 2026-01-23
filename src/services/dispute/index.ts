@@ -5,9 +5,12 @@ import { callApi } from '@/lib/service'
 import {
   Dispute,
   DisputeListResponse,
+  DisputeListItem,
   DisputeMessage,
   DisputeStatus,
 } from '@/types/dispute'
+
+export type { DisputeListItem }
 
 const reasonEnum = z.enum([
   'ITEM_NOT_RECEIVED',
@@ -18,13 +21,6 @@ const reasonEnum = z.enum([
   'SELLER_NOT_SHIPPING',
   'BUYER_NOT_CONFIRMING',
   'OTHER',
-])
-
-const resolutionEnum = z.enum([
-  'RESOLVED_BUYER_FAVOR',
-  'RESOLVED_SELLER_FAVOR',
-  'RESOLVED_PARTIAL',
-  'CLOSED',
 ])
 
 const openDisputeSchema = z.object({
@@ -39,7 +35,7 @@ export const openDispute = (
   payload: OpenDisputeSchema
 ): ApiResponse<Dispute> =>
   callApi(payload, openDisputeSchema, (data) => {
-    return api.post(`/disputes/${roomCode}`, data)
+    return api.post(`/dispute/${roomCode}`, data)
   })
 
 const addMessageSchema = z.object({
@@ -54,7 +50,7 @@ export const addDisputeMessage = (
   payload: AddMessageSchema
 ): ApiResponse<DisputeMessage> =>
   callApi(payload, addMessageSchema, (data) => {
-    return api.post(`/disputes/${disputeCode}/messages`, data)
+    return api.post(`/dispute/${disputeCode}/messages`, data)
   })
 
 interface FetchDisputesParams {
@@ -79,72 +75,15 @@ export const fetchMyDisputes = async (
   }
 
   const queryString = queryParams.toString()
-  const url = queryString ? `/disputes?${queryString}` : '/disputes'
+  const url = queryString ? `/dispute?${queryString}` : '/dispute'
 
   return api.get(url)
 }
 
 export const getDisputeByCode = (disputeCode: string): ApiResponse<Dispute> => {
-  return api.get(`/disputes/${disputeCode}`)
+  return api.get(`/dispute/${disputeCode}`)
 }
 
 export const getDisputeMessages = (disputeCode: string): ApiResponse<DisputeMessage[]> => {
-  return api.get(`/disputes/${disputeCode}/messages`)
+  return api.get(`/dispute/${disputeCode}/messages`)
 }
-
-const adminResolveSchema = z.object({
-  resolution: resolutionEnum,
-  notes: z.string().min(10).max(2000),
-  buyerRefundPercent: z.number().min(0).max(100).optional(),
-  sellerReleasePercent: z.number().min(0).max(100).optional(),
-})
-
-export type AdminResolveSchema = z.infer<typeof adminResolveSchema>
-
-export const adminResolveDispute = (
-  disputeCode: string,
-  payload: AdminResolveSchema
-): ApiResponse<Dispute> =>
-  callApi(payload, adminResolveSchema, (data) => {
-    return api.post(`/disputes/admin/${disputeCode}/resolve`, data)
-  })
-
-export const adminGetPendingDisputes = async (
-  page: number = 1,
-  limit: number = 10
-): ApiResponse<DisputeListResponse> => {
-  const queryParams = new URLSearchParams()
-  queryParams.append('page', page.toString())
-  queryParams.append('limit', limit.toString())
-
-  return api.get(`/disputes/admin/pending?${queryParams.toString()}`)
-}
-
-export const adminGetDisputeDetails = (disputeCode: string): ApiResponse<Dispute> => {
-  return api.get(`/disputes/admin/${disputeCode}`)
-}
-
-const adminTakeUnderReviewSchema = z.object({})
-
-export type AdminTakeUnderReviewSchema = z.infer<typeof adminTakeUnderReviewSchema>
-
-export const adminTakeUnderReview = (
-  disputeCode: string
-): ApiResponse<Dispute> =>
-  callApi({}, adminTakeUnderReviewSchema, () => {
-    return api.post(`/disputes/admin/${disputeCode}/review`)
-  })
-
-const adminAddNoteSchema = z.object({
-  note: z.string().min(1).max(2000),
-})
-
-export type AdminAddNoteSchema = z.infer<typeof adminAddNoteSchema>
-
-export const adminAddNote = (
-  disputeCode: string,
-  payload: AdminAddNoteSchema
-): ApiResponse<DisputeMessage> =>
-  callApi(payload, adminAddNoteSchema, (data) => {
-    return api.post(`/disputes/admin/${disputeCode}/note`, data)
-  })

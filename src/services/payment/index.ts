@@ -69,16 +69,16 @@ export const refundPayment = (
         return api.post(`/room/${roomCode}/refund`, { reason })
     })
 
-// Admin: Verify Payment
-const verifyPaymentSchema = z.object({
-    paymentId: z.string().min(1, 'Payment ID is required'),
-})
+// // Admin: Verify Payment
+// const verifyPaymentSchema = z.object({
+//     paymentId: z.string().min(1, 'Payment ID is required'),
+// })
 
-export type VerifyPaymentSchema = z.infer<typeof verifyPaymentSchema>
+// export type VerifyPaymentSchema = z.infer<typeof verifyPaymentSchema>
 
-export const verifyPayment = (
-    payload: VerifyPaymentSchema
-): ApiResponse<Payment> =>
-    callApi(payload, verifyPaymentSchema, (data) => {
-        return api.post(`/admin/payment/${data.paymentId}/verify`)
-    })
+// export const verifyPayment = (
+//     payload: VerifyPaymentSchema
+// ): ApiResponse<Payment> =>
+//     callApi(payload, verifyPaymentSchema, (data) => {
+//         return api.post(`/admin/payment/${data.paymentId}/verify`)
+//     })
