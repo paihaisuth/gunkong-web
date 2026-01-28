@@ -16,6 +16,12 @@ import { ShIcon } from '@/components/ui/icon'
 import { toast } from 'sonner'
 import { fetchCodeRoom, type Room } from '@/services/room'
 import { getStatusColor, getStatusText } from '@/lib/utils'
+import { useUserStore } from '@/stores/useUserStore'
+import { getUserIdFromToken } from '@/lib/token-utils'
+import { RoomActions } from '../../(main)/[room]/components/RoomActions'
+import { PaymentDialog } from '../../(main)/[room]/components/PaymentDialog'
+import { ShippingAddressDialog } from '../../(main)/[room]/components/ShippingAddressDialog'
+import { PaymentStatusCard } from '../../(main)/[room]/components/PaymentStatusCard'
 
 export default function RoomDetailsPage() {
     const params = useParams()
@@ -23,39 +29,42 @@ export default function RoomDetailsPage() {
     const [roomData, setRoomData] = useState<Room | null>(null)
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
+    const accessToken = useUserStore((state) => state.accessToken)
 
     const roomCode = params.id as string
+    const currentUserId = accessToken ? getUserIdFromToken(accessToken) : null
 
-    useEffect(() => {
-        const fetchRoomData = async () => {
-            if (!roomCode) {
-                setError('ไม่พบรหัสห้อง')
-                setLoading(false)
-                return
-            }
-
-            try {
-                setLoading(true)
-                const response = await fetchCodeRoom({
-                    roomCode: roomCode.toUpperCase(),
-                })
-
-                if (response.data?.data?.item) {
-                    setRoomData(response.data.data.item)
-                    setError(null)
-                } else {
-                    setError('ไม่พบข้อมูลห้อง')
-                }
-            } catch (err) {
-                console.error('Error fetching room:', err)
-                setError('เกิดข้อผิดพลาดในการดึงข้อมูลห้อง')
-                toast('ไม่สามารถดึงข้อมูลห้องได้')
-            } finally {
-                setLoading(false)
-            }
+    const fetchRoomData = async () => {
+        if (!roomCode) {
+            setError('ไม่พบรหัสห้อง')
+            setLoading(false)
+            return
         }
 
+        try {
+            setLoading(true)
+            const response = await fetchCodeRoom({
+                roomCode: roomCode.toUpperCase(),
+            })
+
+            if (response.data?.data?.item) {
+                setRoomData(response.data.data.item)
+                setError(null)
+            } else {
+                setError('ไม่พบข้อมูลห้อง')
+            }
+        } catch (err) {
+            console.error('Error fetching room:', err)
+            setError('เกิดข้อผิดพลาดในการดึงข้อมูลห้อง')
+            toast('ไม่สามารถดึงข้อมูลห้องได้')
+        } finally {
+            setLoading(false)
+        }
+    }
+
+    useEffect(() => {
         fetchRoomData()
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [roomCode])
 
     const handleBackToRooms = () => {
@@ -130,9 +139,21 @@ export default function RoomDetailsPage() {
                         <ShIcon name="arrow-left" size={20} />
                     </ShButton>
                     <div>
-                        <h1 className="text-xl font-bold">
-                            รายละเอียดห้อง {roomData.roomCode}
-                        </h1>
+                        <div className="flex items-center gap-2">
+                            <h1 className="text-xl font-bold">
+                                รายละเอียดห้อง {roomData.roomCode}
+                            </h1>
+                            {currentUserId === roomData.sellerId && (
+                                <ShBadge className="bg-blue-500 text-white">
+                                    ผู้ขาย
+                                </ShBadge>
+                            )}
+                            {currentUserId === roomData.buyerId && (
+                                <ShBadge className="bg-green-500 text-white">
+                                    ผู้ซื้อ
+                                </ShBadge>
+                            )}
+                        </div>
                         <p className="text-muted-foreground">
                             ข้อมูลและรายละเอียดสินค้า
                         </p>
@@ -460,6 +481,38 @@ export default function RoomDetailsPage() {
                             <CardTitle>การดำเนินการ</CardTitle>
                         </CardHeader>
                         <CardContent className="space-y-3">
+                            <RoomActions
+                                roomCode={roomData.roomCode}
+                                roomStatus={roomData.status}
+                                currentUserId={currentUserId || ''}
+                                sellerId={roomData.sellerId}
+                                buyerId={roomData.buyerId}
+                                onSuccess={() => {
+                                    fetchRoomData()
+                                }}
+                            />
+
+                            {roomData.status === 'PENDING_PAYMENT' &&
+                                roomData.buyerId && (
+                                    <>
+                                        <ShippingAddressDialog
+                                            roomCode={roomData.roomCode}
+                                            mode="add"
+                                            onSuccess={() => {
+                                                fetchRoomData()
+                                            }}
+                                        />
+
+                                        <PaymentDialog
+                                            roomCode={roomData.roomCode}
+                                            totalAmount={roomData.totalCents}
+                                            onSuccess={() => {
+                                                fetchRoomData()
+                                            }}
+                                        />
+                                    </>
+                                )}
+
                             <ShButton variant="outline" className="w-full">
                                 <ShIcon
                                     name="share-2"
@@ -468,19 +521,12 @@ export default function RoomDetailsPage() {
                                 />
                                 แชร์ห้อง
                             </ShButton>
-
-                            {roomData.status === 'SHIPPED' && (
-                                <ShButton variant="outline" className="w-full">
-                                    <ShIcon
-                                        name="check-circle"
-                                        size={16}
-                                        className="mr-2"
-                                    />
-                                    ยืนยันการรับสินค้า
-                                </ShButton>
-                            )}
                         </CardContent>
                     </Card>
+
+                    {roomData.paidAt && (
+                        <PaymentStatusCard roomCode={roomData.roomCode} />
+                    )}
                 </div>
             </div>
         </div>

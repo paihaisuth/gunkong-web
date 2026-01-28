@@ -36,6 +36,8 @@ import { ShIcon } from '@/components/ui/icon'
 import { ShBadge } from '@/components/ui/badge'
 import type { Room } from '@/services/room'
 import { getStatusColor, getStatusText } from '@/lib/utils'
+import { useUserStore } from '@/stores/useUserStore'
+import { getUserIdFromToken } from '@/lib/token-utils'
 import {
     Pagination,
     PaginationContent,
@@ -83,6 +85,8 @@ export default function Room() {
     const itemsPerPage = 9
     const [searchText, setSearchText] = useState('')
     const [debouncedSearchText, setDebouncedSearchText] = useState('')
+    const accessToken = useUserStore((state) => state.accessToken)
+    const currentUserId = accessToken ? getUserIdFromToken(accessToken) : null
 
     const form = useForm<CreateRoomFormValues>({
         resolver: zodResolver(createRoomSchema),
@@ -464,16 +468,28 @@ export default function Room() {
                                     <CardHeader className="pb-3">
                                         <div className="flex items-start justify-between">
                                             <div className="flex-1 min-w-0">
-                                                <CardTitle className="text-lg line-clamp-2">
-                                                    {room.itemTitle}
-                                                </CardTitle>
+                                                <div className="flex items-center gap-2">
+                                                    <CardTitle className="text-lg line-clamp-2">
+                                                        {room.itemTitle}
+                                                    </CardTitle>
+                                                    {currentUserId === room.sellerId && (
+                                                        <ShBadge className="bg-blue-500 text-white text-xs shrink-0">
+                                                            ผู้ขาย
+                                                        </ShBadge>
+                                                    )}
+                                                    {currentUserId === room.buyerId && (
+                                                        <ShBadge className="bg-green-500 text-white text-xs shrink-0">
+                                                            ผู้ซื้อ
+                                                        </ShBadge>
+                                                    )}
+                                                </div>
                                                 <CardDescription className="mt-1">
                                                     รหัสห้อง: {room.roomCode}
                                                 </CardDescription>
                                             </div>
                                             <ShBadge
                                                 variant="secondary"
-                                                className={`ml-2 ${getStatusColor(
+                                                className={`ml-2 shrink-0 ${getStatusColor(
                                                     room.status
                                                 )}`}
                                             >
