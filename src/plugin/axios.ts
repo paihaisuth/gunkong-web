@@ -10,13 +10,6 @@ let failedQueue: Array<{
     reject: (reason?: unknown) => void
 }> = []
 
-let csrfToken: string | null = null
-let isCsrfInitializing = false
-let csrfQueue: Array<{
-    resolve: (value: string | null | PromiseLike<string | null>) => void
-    reject: (reason?: unknown) => void
-}> = []
-
 function processQueue(error: unknown, token: string | null = null) {
     failedQueue.forEach((prom) => {
         if (error) {
@@ -28,17 +21,6 @@ function processQueue(error: unknown, token: string | null = null) {
     failedQueue = []
 }
 
-function processCsrfQueue(error: unknown, token: string | null = null) {
-    csrfQueue.forEach((prom) => {
-        if (error) {
-            prom.reject(error)
-        } else {
-            prom.resolve(token)
-        }
-    })
-    csrfQueue = []
-}
-
 function redirectToLogin() {
     if (typeof window !== 'undefined') {
         const currentPath = window.location.pathname
@@ -47,43 +29,6 @@ function redirectToLogin() {
                 currentPath
             )}`
         }
-    }
-}
-
-export const clearCsrfToken = () => {
-    csrfToken = null
-}
-
-export const initializeCsrfToken = async (): Promise<string | null> => {
-    if (csrfToken) {
-        return csrfToken
-    }
-
-    if (isCsrfInitializing) {
-        return new Promise<string | null>((resolve, reject) => {
-            csrfQueue.push({ resolve, reject })
-        })
-    }
-
-    isCsrfInitializing = true
-
-    try {
-        const response = await axios.get(
-            `${
-                process.env.NEXT_PUBLIC_API_BASE_URL ||
-                'http://localhost:8800/api'
-            }/csrf-token`,
-            { withCredentials: true }
-        )
-        csrfToken = response.data.csrfToken
-        processCsrfQueue(null, csrfToken)
-        return csrfToken
-    } catch (error) {
-        console.error('Failed to fetch CSRF token:', error)
-        processCsrfQueue(error, null)
-        return null
-    } finally {
-        isCsrfInitializing = false
     }
 }
 
@@ -127,32 +72,6 @@ const createAxiosInstance = () => {
                 }
             }
 
-            // Add CSRF token for state-changing requests (only for authenticated users)
-            const method = config.method?.toLowerCase()
-            if (['post', 'put', 'patch', 'delete'].includes(method || '')) {
-                // Skip CSRF for auth endpoints (login, register, etc.)
-                const authEndpoints = ['/login', '/register', '/refresh-token', '/google']
-                const isAuthEndpoint = authEndpoints.some(endpoint =>
-                    config.url?.includes(endpoint)
-                )
-
-                // Only add CSRF token for non-auth endpoints when user is authenticated
-                if (!isAuthEndpoint && token) {
-                    // Fetch CSRF token on-demand if not available
-                    if (!csrfToken) {
-                        try {
-                            await initializeCsrfToken()
-                        } catch (error) {
-                            console.warn('Failed to fetch CSRF token:', error)
-                        }
-                    }
-
-                    if (csrfToken) {
-                        config.headers['X-CSRF-Token'] = csrfToken
-                    }
-                }
-            }
-
             return config
         },
         function (error) {
@@ -164,26 +83,6 @@ const createAxiosInstance = () => {
         (response: AxiosResponse) => response,
         async (error) => {
             const originalRequest = error.config
-
-            if (
-                error.response?.status === 403 &&
-                (error.response?.data?.code === 'EBADCSRFTOKEN' ||
-                    error.response?.data?.message?.includes('CSRF')) &&
-                !originalRequest._csrfRetry
-            ) {
-                originalRequest._csrfRetry = true
-
-                try {
-                    const newToken = await initializeCsrfToken()
-                    if (newToken) {
-                        originalRequest.headers['X-CSRF-Token'] = newToken
-                        return instance(originalRequest)
-                    }
-                } catch (err) {
-                    console.error('Failed to refresh CSRF token:', err)
-                    return Promise.reject(err)
-                }
-            }
 
             if (
                 error.response &&
