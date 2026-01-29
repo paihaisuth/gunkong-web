@@ -496,7 +496,9 @@ export default function RoomPage() {
                         </CardContent>
                     </Card>
 
-                    <PaymentStatusCard roomCode={roomData.roomCode} />
+                    {roomData.paidAt && (
+                        <PaymentStatusCard roomCode={roomData.roomCode} />
+                    )}
 
                     <Card>
                         <CardHeader>
